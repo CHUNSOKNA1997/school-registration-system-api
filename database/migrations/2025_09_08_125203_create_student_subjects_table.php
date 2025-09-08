@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Enums\EnrollmentStatus;
 
 return new class extends Migration
 {
@@ -22,7 +23,7 @@ return new class extends Migration
             $table->date('completion_date')->nullable();
             $table->decimal('score', 5, 2)->nullable();
             $table->string('grade', 2)->nullable();
-            $table->enum('status', ['active', 'dropped', 'completed', 'failed'])->default('active');
+            $table->enum('status', EnrollmentStatus::values())->default(EnrollmentStatus::ACTIVE->value);
             $table->text('notes')->nullable();
             $table->timestamps();
             

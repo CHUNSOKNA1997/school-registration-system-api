@@ -3,6 +3,10 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Enums\PaymentType;
+use App\Enums\PaymentPeriod;
+use App\Enums\PaymentMethod;
+use App\Enums\PaymentStatus;
 
 return new class extends Migration
 {
@@ -22,13 +26,13 @@ return new class extends Migration
             $table->decimal('discount_amount', 10, 2)->default(0);
             $table->decimal('paid_amount', 10, 2)->default(0);
             $table->decimal('balance', 10, 2)->default(0);
-            $table->enum('payment_type', ['registration', 'tuition', 'exam', 'certificate', 'other'])->default('tuition');
-            $table->enum('payment_period', ['monthly', 'quarterly', 'semester', 'yearly', 'one_time']);
-            $table->enum('payment_method', ['cash', 'bank_transfer', 'khqr', 'aba', 'acleda', 'wing']);
+            $table->enum('payment_type', PaymentType::values())->default(PaymentType::TUITION->value);
+            $table->enum('payment_period', PaymentPeriod::values());
+            $table->enum('payment_method', PaymentMethod::values());
             $table->string('payment_month', 7)->nullable(); // 2024-01
             $table->date('payment_date')->nullable();
             $table->date('due_date');
-            $table->enum('status', ['pending', 'paid', 'partial', 'overdue', 'cancelled'])->default('pending');
+            $table->enum('status', PaymentStatus::values())->default(PaymentStatus::PENDING->value);
             $table->string('khqr_reference', 100)->nullable();
             $table->string('bank_reference', 100)->nullable();
             $table->string('receipt_number', 30)->nullable();

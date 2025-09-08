@@ -3,6 +3,8 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Enums\Gender;
+use App\Enums\EmploymentType;
 
 return new class extends Migration
 {
@@ -18,7 +20,7 @@ return new class extends Migration
             $table->string('first_name', 100);
             $table->string('last_name', 100);
             $table->string('khmer_name')->nullable();
-            $table->enum('gender', ['male', 'female', 'other']);
+            $table->enum('gender', Gender::values());
             $table->date('date_of_birth')->nullable();
             $table->string('nationality', 50)->default('Cambodian');
             $table->string('email')->unique()->nullable();
@@ -30,7 +32,7 @@ return new class extends Migration
             $table->string('specialization')->nullable();
             $table->decimal('salary', 10, 2)->nullable();
             $table->date('hire_date')->nullable();
-            $table->enum('employment_type', ['full_time', 'part_time', 'contract'])->default('full_time');
+            $table->enum('employment_type', EmploymentType::values())->default(EmploymentType::FULL_TIME->value);
             $table->string('photo')->nullable();
             $table->json('documents')->nullable();
             $table->boolean('is_active')->default(true);

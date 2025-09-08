@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Enums\UserRole;
 
 return new class extends Migration
 {
@@ -17,7 +18,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
-            $table->boolean('is_admin')->default(false);
+            $table->enum('role', UserRole::values())->default(UserRole::STAFF->value);
             $table->boolean('is_active')->default(true);
             $table->timestamp('last_login_at')->nullable();
             $table->string('avatar')->nullable();
@@ -29,7 +30,7 @@ return new class extends Migration
             // Indexes for performance
             $table->index('uuid');
             $table->index('email');
-            $table->index('is_admin');
+            $table->index('role');
             $table->index('is_active');
         });
     }
