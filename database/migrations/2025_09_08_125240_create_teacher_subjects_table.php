@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Enums\TeacherRole;
 
 return new class extends Migration
 {
@@ -21,7 +20,7 @@ return new class extends Migration
             $table->string('academic_year', 9);
             $table->date('assigned_date');
             $table->date('end_date')->nullable();
-            $table->enum('role', TeacherRole::values())->default(TeacherRole::PRIMARY->value);
+            $table->enum('role', ['primary', 'assistant', 'substitute'])->default('primary');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
             

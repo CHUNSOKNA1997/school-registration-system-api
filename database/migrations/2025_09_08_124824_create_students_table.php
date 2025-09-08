@@ -5,7 +5,6 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use App\Enums\Gender;
 use App\Enums\StudentType;
-use App\Enums\StudentStatus;
 use App\Enums\Shift;
 
 return new class extends Migration
@@ -43,7 +42,7 @@ return new class extends Migration
             $table->string('previous_school')->nullable();
             $table->string('photo')->nullable();
             $table->json('documents')->nullable(); // Store document paths
-            $table->enum('status', StudentStatus::values())->default(StudentStatus::ACTIVE->value);
+            $table->enum('status', ['active', 'inactive', 'suspended', 'graduated'])->default('active');
             $table->text('notes')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users');
             $table->foreignId('updated_by')->nullable()->constrained('users');

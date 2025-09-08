@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Enums\SubjectType;
 
 return new class extends Migration
 {
@@ -20,7 +19,7 @@ return new class extends Migration
             $table->string('name_khmer')->nullable();
             $table->text('description')->nullable();
             $table->integer('grade_level');
-            $table->enum('subject_type', SubjectType::values())->default(SubjectType::CORE->value);
+            $table->enum('subject_type', ['core', 'elective', 'extra'])->default('core');
             $table->integer('credits')->default(1);
             $table->integer('hours_per_week')->default(1);
             $table->decimal('fee', 10, 2)->default(0);

@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\Schema;
 use App\Enums\PaymentType;
 use App\Enums\PaymentPeriod;
 use App\Enums\PaymentMethod;
-use App\Enums\PaymentStatus;
 
 return new class extends Migration
 {
@@ -32,7 +31,7 @@ return new class extends Migration
             $table->string('payment_month', 7)->nullable(); // 2024-01
             $table->date('payment_date')->nullable();
             $table->date('due_date');
-            $table->enum('status', PaymentStatus::values())->default(PaymentStatus::PENDING->value);
+            $table->enum('status', ['pending', 'paid', 'partial', 'overdue', 'cancelled'])->default('pending');
             $table->string('khqr_reference', 100)->nullable();
             $table->string('bank_reference', 100)->nullable();
             $table->string('receipt_number', 30)->nullable();
