@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'ngrok' => [
+        'url' => env('NGROK_URL', null),
+    ],
+
 ];

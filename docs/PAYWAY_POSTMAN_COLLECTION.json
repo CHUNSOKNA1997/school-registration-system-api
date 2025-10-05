@@ -1,0 +1,125 @@
+{
+  "info": {
+    "name": "PayWay KHQR API",
+    "description": "PayWay KHQR integration for School Registration System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000/api"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "payment_uuid",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Generate KHQR",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"payment_uuid\": \"{{payment_uuid}}\",\n    \"first_name\": \"Sophea\",\n    \"last_name\": \"Chan\",\n    \"email\": \"sophea@example.com\",\n    \"phone\": \"012345678\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/payway/khqr/generate",
+          "host": ["{{base_url}}"],
+          "path": ["payway", "khqr", "generate"]
+        },
+        "description": "Generate KHQR for a payment"
+      }
+    },
+    {
+      "name": "2. Check Payment Status",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"payment_uuid\": \"{{payment_uuid}}\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/payway/payment/status",
+          "host": ["{{base_url}}"],
+          "path": ["payway", "payment", "status"]
+        },
+        "description": "Check payment status"
+      }
+    },
+    {
+      "name": "3. Webhook (Simulate Success)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"tran_id\": \"PAY202510-0001\",\n    \"status\": \"0\",\n    \"apv\": \"123456789\",\n    \"return_params\": \"eyJ0cmFuc2FjdGlvbl91dWlkIjoiOTlhYjNkMzQtZGNhZi00MjI4LWI2ZTgtMzQ1Njc4OWFiY2RlIiwicGF5bWVudF91dWlkIjoiNzdhYjNkMzQtZGNhZi00MjI4LWI2ZTgtMTIzNDU2N2FiY2RlIn0=\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/payway/webhook",
+          "host": ["{{base_url}}"],
+          "path": ["payway", "webhook"]
+        },
+        "description": "Simulate PayWay webhook callback (success)"
+      }
+    },
+    {
+      "name": "4. Webhook (Simulate Failure)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"tran_id\": \"PAY202510-0001\",\n    \"status\": \"1\",\n    \"status_message\": \"Transaction failed\",\n    \"return_params\": \"eyJ0cmFuc2FjdGlvbl91dWlkIjoiOTlhYjNkMzQtZGNhZi00MjI4LWI2ZTgtMzQ1Njc4OWFiY2RlIiwicGF5bWVudF91dWlkIjoiNzdhYjNkMzQtZGNhZi00MjI4LWI2ZTgtMTIzNDU2N2FiY2RlIn0=\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/payway/webhook",
+          "host": ["{{base_url}}"],
+          "path": ["payway", "webhook"]
+        },
+        "description": "Simulate PayWay webhook callback (failure)"
+      }
+    }
+  ]
+}

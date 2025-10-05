@@ -88,6 +88,11 @@ class Payment extends Model
         return $this->belongsTo(Subject::class);
     }
 
+    public function paywayTransaction()
+    {
+        return $this->hasOne(PaywayTransaction::class);
+    }
+
     // Scopes
     public function scopePaid($query)
     {
