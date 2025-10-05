@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TeacherController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,5 +25,6 @@ Route::group(['prefix' => 'v1', 'as' => 'v1.'], function () {
         Route::apiResource('students', StudentController::class);
         Route::apiResource('teachers', TeacherController::class);
         Route::apiResource('classrooms', ClassroomController::class);
+        Route::apiResource('subjects', SubjectController::class);
     });
 });
