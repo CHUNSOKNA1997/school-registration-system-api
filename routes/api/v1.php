@@ -12,7 +12,7 @@ Route::group(['prefix' => 'v1', 'as' => 'v1.'], function () {
         // Protected routes
         Route::middleware('auth:sanctum')->group(function () {
             Route::delete('logout', [AuthController::class, 'logout']);
-            Route::get('user', [AuthController::class, 'me']);
+            Route::get('user', [AuthController::class, 'user']);
         });
     });
 });

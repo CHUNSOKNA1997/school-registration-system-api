@@ -16,11 +16,11 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'phone' => 'nullable|string|max:20',
-            'is_admin' => 'boolean',
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'is_admin' => ['boolean'],
         ]);
 
         $user = User::create([
@@ -34,14 +34,10 @@ class AuthController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
-            'success' => true,
-            'message' => 'User registered successfully',
-            'data' => [
-                'user' => $user,
-                'token' => $token,
-            ],
-        ], 201);
+        return response()->jsonSuccess([
+            'user' => $user,
+            'token' => $token,
+        ], 201, 'User registered successfully');
     }
 
     /**
@@ -50,21 +46,21 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
+            'email' => ['required', 'email'],
+            'password' => ['required'],
         ]);
 
         $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
+                'email' => 'The provided credentials are incorrect.',
             ]);
         }
 
         if (!$user->is_active) {
             throw ValidationException::withMessages([
-                'email' => ['Your account has been deactivated.'],
+                'email' => 'Your account has been deactivated.',
             ]);
         }
 
@@ -74,14 +70,10 @@ class AuthController extends Controller
         // Create token
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Login successful',
-            'data' => [
-                'user' => $user,
-                'token' => $token,
-            ],
-        ]);
+        return response()->jsonSuccess([
+            'user' => $user,
+            'token' => $token,
+        ], 200, 'Login successful');
     }
 
     /**
@@ -93,21 +85,15 @@ class AuthController extends Controller
         $token = $request->user()->currentAccessToken();
         $token->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Logged out successfully',
-        ]);
+        return response()->jsonSuccess([], 200, 'Logged out successfully');
     }
 
     /**
      * Get authenticated user
      */
-    public function me(Request $request)
+    public function user(Request $request)
     {
-        return response()->json([
-            'success' => true,
-            'data' => $request->user(),
-        ]);
+        return response()->jsonSuccess($request->user());
     }
 
     /**
@@ -125,12 +111,8 @@ class AuthController extends Controller
         // Create new token
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Token refreshed successfully',
-            'data' => [
-                'token' => $token,
-            ],
-        ]);
+        return response()->jsonSuccess([
+            'token' => $token,
+        ], 200, 'Token refreshed successfully');
     }
 }
