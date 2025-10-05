@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -35,7 +36,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->jsonSuccess([
-            'user' => $user,
+            'user' => UserResource::make($user),
             'token' => $token,
         ], 201, 'User registered successfully');
     }
@@ -71,7 +72,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->jsonSuccess([
-            'user' => $user,
+            'user' => UserResource::make($user),
             'token' => $token,
         ], 200, 'Login successful');
     }
@@ -93,7 +94,7 @@ class AuthController extends Controller
      */
     public function user(Request $request)
     {
-        return response()->jsonSuccess($request->user());
+        return response()->jsonSuccess(UserResource::make($request->user()));
     }
 
     /**

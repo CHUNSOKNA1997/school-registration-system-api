@@ -149,7 +149,7 @@ class Student extends Model
     public static function generateStudentCode()
     {
         $year = date('Y');
-        $lastStudent = self::where('student_code', 'like', "{$year}-%")
+        $lastStudent = self::where('student_code', 'like', "STU{$year}-%")
             ->orderBy('student_code', 'desc')
             ->first();
 
@@ -160,6 +160,6 @@ class Student extends Model
             $newNumber = '0001';
         }
 
-        return "{$year}-{$newNumber}";
+        return "STU{$year}-{$newNumber}";
     }
 }
