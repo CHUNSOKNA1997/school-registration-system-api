@@ -19,11 +19,6 @@ Route::get('/payment/{payment:uuid}/checkout', function (Payment $payment) {
     ]);
 })->name('payment.checkout');
 
-// TEST PAGE - Remove this in production!
-Route::get('/test-payment', function () {
-    return view('test-payment');
-});
-
 // PayWay Hosted Checkout Page - Redirect to PayWay's checkout URL
 Route::get('/payway/checkout/{payment:uuid}', function (Payment $payment) {
     $service = new App\Services\PaywayService();

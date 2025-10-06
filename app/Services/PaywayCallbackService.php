@@ -25,11 +25,6 @@ class PaywayCallbackService
             $ngrokUrl = rtrim(config('services.ngrok.url'), '/');
             $url = base64_encode($ngrokUrl . $path);
 
-            Log::info('PayWay Callback URL (ngrok)', [
-                'path' => $path,
-                'url' => $ngrokUrl . $path,
-            ]);
-
             return $url;
         }
 
@@ -37,11 +32,6 @@ class PaywayCallbackService
         $possibleNgrokUrl = self::detectNgrokUrl();
         if ($possibleNgrokUrl) {
             $url = base64_encode($possibleNgrokUrl . $path);
-
-            Log::info('PayWay Callback URL (auto-detected ngrok)', [
-                'path' => $path,
-                'url' => $possibleNgrokUrl . $path,
-            ]);
 
             return $url;
         }

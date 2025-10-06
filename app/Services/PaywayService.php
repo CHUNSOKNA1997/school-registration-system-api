@@ -222,26 +222,6 @@ class PaywayService
                      $returnDeeplink . $currency . $customFields . $returnParams . $payout .
                      $lifetime . $additionalParams . $googlePayToken;
 
-        Log::info('QR Hash Debug', [
-            'reqTime' => $reqTime,
-            'merchantId' => $merchantId,
-            'transactionId' => $transactionId,
-            'amount' => $amount,
-            'items' => $items,
-            'firstName' => $firstName,
-            'lastName' => $lastName,
-            'email' => $email,
-            'phone' => $phone,
-            'type' => $type,
-            'paymentOption' => $paymentOption,
-            'callbackUrl' => $callbackUrl,
-            'returnDeeplink' => $returnDeeplink,
-            'currency' => $currency,
-            'customFields' => $customFields,
-            'returnParams' => $returnParams,
-            'dataToHash' => $dataToHash,
-        ]);
-
         return base64_encode(hash_hmac('sha512', $dataToHash, $apiKey, true));
     }
 
@@ -270,14 +250,6 @@ class PaywayService
 
         if (!$responseData) {
             throw new \Exception('Invalid response from PayWay API');
-        }
-
-        // Log the response for debugging
-        if (config('payway.log_all_events')) {
-            Log::info('PayWay API Response', [
-                'endpoint' => $apiUrl,
-                'response' => $responseData,
-            ]);
         }
 
         return $responseData;
@@ -490,29 +462,6 @@ class PaywayService
                      $type . $paymentOption . $returnUrl . $cancelUrl . $continueUrl .
                      $returnDeeplink . $currency . $customFields . $returnParams . $payout .
                      $lifetime . $additionalParams . $googlePayToken;
-
-        Log::info('Hash Debug for Hosted Page', [
-            'reqTime' => $reqTime,
-            'merchantId' => $merchantId,
-            'transactionId' => $transactionId,
-            'amount' => $amount,
-            'items' => $items,
-            'shipping' => $shipping,
-            'firstName' => $firstName,
-            'lastName' => $lastName,
-            'email' => $email,
-            'phone' => $phone,
-            'type' => $type,
-            'paymentOption' => $paymentOption,
-            'returnUrl' => $returnUrl,
-            'cancelUrl' => $cancelUrl,
-            'continueUrl' => $continueUrl,
-            'returnDeeplink' => $returnDeeplink,
-            'currency' => $currency,
-            'customFields' => $customFields,
-            'returnParams' => $returnParams,
-            'dataToHash' => $dataToHash,
-        ]);
 
         return base64_encode(hash_hmac('sha512', $dataToHash, $apiKey, true));
     }
