@@ -19,6 +19,7 @@ class Payment extends Model
         'payment_code',
         'student_id',
         'subject_id',
+        'academic_year',
         'payment_type',
         'payment_period',
         'amount',
@@ -34,6 +35,7 @@ class Payment extends Model
         'receipt_number',
         'description',
         'notes',
+        'paid_at',
     ];
 
     protected function casts(): array

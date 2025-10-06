@@ -17,4 +17,7 @@ Route::group(['prefix' => 'payway'], function () {
 
     // Webhook route (no authentication - PayWay callback)
     Route::post('/webhook', [PaymentController::class, 'webhook']);
+
+    // TEST ROUTE - Remove this in production!
+    Route::post('/test/khqr', [PaymentController::class, 'generateKHQR'])->name('payway.test.khqr');
 });
