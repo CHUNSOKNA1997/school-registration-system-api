@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Log;
-
 class PaywayCallbackService
 {
     /**
@@ -36,13 +34,7 @@ class PaywayCallbackService
             return $url;
         }
 
-        // Fallback to regular URL with warning logged
-        Log::warning('PayWay: No ngrok URL detected. External services may not reach the callback.', [
-            'path' => $path,
-            'fallback_url' => url($path),
-            'environment' => app()->environment(),
-        ]);
-
+        // Fallback to regular URL
         return base64_encode(url($path));
     }
 

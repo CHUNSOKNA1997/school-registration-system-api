@@ -9,7 +9,6 @@ use App\Models\PaywayPushback;
 use App\Services\PaywayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
@@ -65,11 +64,6 @@ class PaymentController extends Controller
                 'data' => $result,
             ]);
         } catch (\Exception $e) {
-            Log::error('Generate KHQR Error', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to generate KHQR',
@@ -89,9 +83,6 @@ class PaymentController extends Controller
         DB::beginTransaction();
 
         try {
-            // Log incoming webhook
-            Log::info('PayWay Webhook Received', $request->all());
-
             // Create pushback record
             $pushback = PaywayPushback::create([
                 'tran_id' => $request->tran_id,
@@ -130,25 +121,12 @@ class PaymentController extends Controller
                     'payment_date' => now(),
                     'payment_method' => 'KHQR',
                 ]);
-
-                Log::info('Payment Completed', [
-                    'payment_uuid' => $payment->uuid,
-                    'transaction_uuid' => $transaction->uuid,
-                    'apv' => $request->apv,
-                ]);
             } else {
                 // Failure path
                 $transaction->markAsFailed($pushback);
 
                 $payment->update([
                     'status' => 'pending', // Keep as pending so user can retry
-                ]);
-
-                Log::warning('Payment Failed', [
-                    'payment_uuid' => $payment->uuid,
-                    'transaction_uuid' => $transaction->uuid,
-                    'error_code' => $request->status,
-                    'error_message' => $request->status_message ?? 'Unknown error',
                 ]);
             }
 
@@ -158,12 +136,6 @@ class PaymentController extends Controller
             return response()->json(['status' => 'success']);
         } catch (\Throwable $e) {
             DB::rollBack();
-
-            Log::error('Webhook Processing Error', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'request_data' => $request->all(),
-            ]);
 
             // Still return success to PayWay to avoid retries
             return response()->json(['status' => 'success']);

@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Payment;
 use App\Models\PaywayTransaction;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class PaywayService
 {
@@ -164,6 +163,8 @@ class PaywayService
             return [
                 'success' => true,
                 'transaction_uuid' => $transaction->uuid,
+                'tran_id' => $transaction->tran_id,
+                'amount' => $payment->amount,
                 'qr_string' => $response['qrString'] ?? null,
                 'qr_url' => $response['qrImage'] ?? null,
                 'deeplink' => $response['abapay_deeplink'] ?? null,
@@ -175,12 +176,6 @@ class PaywayService
                 'hosted_checkout_url' => url("/payway/checkout/{$payment->uuid}"),
             ];
         } catch (\Exception $e) {
-            Log::error('KHQR Generation Failed', [
-                'payment_id' => $payment->id,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
             return [
                 'success' => false,
                 'message' => 'Failed to generate KHQR: ' . $e->getMessage(),

@@ -10,7 +10,7 @@ Route::group(['prefix' => 'user'], function () {
 // Payway Payment Routes
 Route::group(['prefix' => 'payway/v1'], function () {
     // Protected routes (require authentication)
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/khqr/generate', [PaymentController::class, 'generateKHQR']);
         Route::post('/payment/status', [PaymentController::class, 'checkStatus']);
     });

@@ -17,14 +17,15 @@ class Payment extends Model
     protected $fillable = [
         'uuid',
         'payment_code',
+        'invoice_number',
         'student_id',
-        'subject_id',
         'academic_year',
+        'amount',
+        'discount_amount',
+        'paid_amount',
+        'balance',
         'payment_type',
         'payment_period',
-        'amount',
-        'discount',
-        'total_amount',
         'payment_method',
         'payment_month',
         'payment_date',
@@ -35,6 +36,7 @@ class Payment extends Model
         'receipt_number',
         'description',
         'notes',
+        'received_by',
         'paid_at',
     ];
 

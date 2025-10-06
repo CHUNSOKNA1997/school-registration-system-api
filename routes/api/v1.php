@@ -14,14 +14,14 @@ Route::group(['prefix' => 'v1', 'as' => 'v1.'], function () {
         Route::post('login', [AuthController::class, 'login']);
 
         // Protected routes
-        Route::middleware('auth:sanctum')->group(function () {
+        Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('logout', [AuthController::class, 'logout']);
             Route::get('user', [AuthController::class, 'user']);
         });
     });
 
     // Protected resource routes
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(['auth:sanctum'])->group(function () {
         Route::apiResource('students', StudentController::class);
         Route::apiResource('teachers', TeacherController::class);
         Route::apiResource('classrooms', ClassroomController::class);
