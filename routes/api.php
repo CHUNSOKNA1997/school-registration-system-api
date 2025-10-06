@@ -8,7 +8,7 @@ Route::group(['prefix' => 'user'], function () {
 });
 
 // Payway Payment Routes
-Route::group(['prefix' => 'payway'], function () {
+Route::group(['prefix' => 'payway/v1'], function () {
     // Protected routes (require authentication)
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/khqr/generate', [PaymentController::class, 'generateKHQR']);
@@ -17,7 +17,4 @@ Route::group(['prefix' => 'payway'], function () {
 
     // Webhook route (no authentication - PayWay callback)
     Route::post('/webhook', [PaymentController::class, 'webhook']);
-
-    // TEST ROUTE - Remove this in production!
-    Route::post('/test/khqr', [PaymentController::class, 'generateKHQR'])->name('payway.test.khqr');
 });
