@@ -864,3 +864,258 @@ document.getElementById('payBtn').addEventListener('click', async () => {
 **That's it! You now have a complete PayWay KHQR integration.** 🎉
 
 For questions or issues, refer to the troubleshooting section or contact your development team.
+
+---
+
+## Detailed Service Explanations
+
+### PaywayCallbackService - The Smart Webhook URL Generator
+
+This service solves a critical problem: **PayWay needs a public URL to send webhook callbacks, but your local development server (localhost:8000) is not accessible from the internet.**
+
+#### The Problem
+
+```
+PayWay Server → Tries to call http://localhost:8000/api/payway/v1/webhook → FAILS ❌
+(PayWay is on the internet, your localhost is not)
+```
+
+#### The Solution
+
+PaywayCallbackService automatically detects your environment and returns the correct URL:
+
+**1. Production/Staging:** Uses your actual domain
+```php
+// Returns: https://yourschool.com/api/payway/v1/webhook
+```
+
+**2. Local Development with ngrok:** Uses your ngrok tunnel URL
+```php
+// You set: NGROK_URL=https://abc123.ngrok.io
+// Returns: https://abc123.ngrok.io/api/payway/v1/webhook
+```
+
+**3. Auto-detection:** Automatically detects ngrok from HTTP headers
+```php
+// Checks X-Forwarded-Host header for ngrok domain
+// Returns: https://detected-url.ngrok.io/api/payway/v1/webhook
+```
+
+#### How It Works
+
+**File:** `app/Services/PaywayCallbackService.php`
+
+**Main Method:** `getCallbackUrl(string $path): string`
+
+```php
+// In PaywayService.php (line 51)
+$returnUrl = PaywayCallbackService::getCallbackUrl('/api/payway/v1/webhook');
+
+// This returns a base64-encoded URL that PayWay can reach
+// PayWay will call this URL when payment is complete
+```
+
+**Why base64 encoding?**
+PayWay requires callback URLs to be base64-encoded in the API request for security purposes.
+
+#### Environment Detection Flow
+
+```
+Step 1: Is environment production/staging?
+   ├─ YES → Use url('/api/payway/v1/webhook') ✅
+   └─ NO → Go to Step 2
+
+Step 2: Is NGROK_URL configured in .env?
+   ├─ YES → Use NGROK_URL + path ✅
+   └─ NO → Go to Step 3
+
+Step 3: Can we auto-detect ngrok from HTTP headers?
+   ├─ YES → Use detected URL + path ✅
+   └─ NO → Go to Step 4
+
+Step 4: Fallback to regular URL + log warning ⚠️
+   (Webhook will likely fail in local development)
+```
+
+#### Code Breakdown
+
+**Method 1: getCallbackUrl()**
+
+```php
+public static function getCallbackUrl(string $path): string
+{
+    // Production/Staging: Use real domain
+    if (app()->environment('production', 'staging')) {
+        return base64_encode(url($path));
+    }
+
+    // Development: Check for explicit ngrok config
+    if (config('services.ngrok.url')) {
+        $ngrokUrl = rtrim(config('services.ngrok.url'), '/');
+        return base64_encode($ngrokUrl . $path);
+    }
+
+    // Try auto-detection
+    $possibleNgrokUrl = self::detectNgrokUrl();
+    if ($possibleNgrokUrl) {
+        return base64_encode($possibleNgrokUrl . $path);
+    }
+
+    // Fallback with warning
+    Log::warning('PayWay: No ngrok URL detected. Webhooks may fail.');
+    return base64_encode(url($path));
+}
+```
+
+**Method 2: detectNgrokUrl()**
+
+```php
+protected static function detectNgrokUrl(): ?string
+{
+    // Check X-Forwarded-Host header (ngrok sets this)
+    if (isset($_SERVER['HTTP_X_FORWARDED_HOST']) && 
+        strpos($_SERVER['HTTP_X_FORWARDED_HOST'], 'ngrok') !== false) {
+        return 'https://' . $_SERVER['HTTP_X_FORWARDED_HOST'];
+    }
+
+    // Check X-Original-Host header
+    if (isset($_SERVER['HTTP_X_ORIGINAL_HOST']) && 
+        strpos($_SERVER['HTTP_X_ORIGINAL_HOST'], 'ngrok') !== false) {
+        return 'https://' . $_SERVER['HTTP_X_ORIGINAL_HOST'];
+    }
+
+    return null;
+}
+```
+
+#### Configuration Setup
+
+**Add to `config/services.php`:**
+
+```php
+return [
+    // ... other services
+
+    'ngrok' => [
+        'url' => env('NGROK_URL'),
+    ],
+];
+```
+
+**Add to `.env` (local development only):**
+
+```env
+# Start ngrok: ngrok http 8000
+# Copy the HTTPS URL it gives you
+NGROK_URL=https://abc123.ngrok.io
+```
+
+#### Usage Example
+
+**Scenario 1: Production**
+```php
+// Environment: production
+// .env: APP_ENV=production
+
+$url = PaywayCallbackService::getCallbackUrl('/api/payway/v1/webhook');
+// Returns: base64("https://school.com/api/payway/v1/webhook")
+```
+
+**Scenario 2: Local Development with ngrok configured**
+```php
+// Environment: local
+// .env: 
+//   APP_ENV=local
+//   NGROK_URL=https://abc123.ngrok.io
+
+$url = PaywayCallbackService::getCallbackUrl('/api/payway/v1/webhook');
+// Returns: base64("https://abc123.ngrok.io/api/payway/v1/webhook")
+```
+
+**Scenario 3: Local Development with auto-detection**
+```php
+// Environment: local
+// ngrok running but not configured in .env
+// HTTP header: X-Forwarded-Host: xyz789.ngrok.io
+
+$url = PaywayCallbackService::getCallbackUrl('/api/payway/v1/webhook');
+// Returns: base64("https://xyz789.ngrok.io/api/payway/v1/webhook")
+```
+
+#### Why This Service is Essential
+
+**Without PaywayCallbackService:**
+```php
+// ❌ Hardcoded - breaks in different environments
+$returnUrl = base64_encode('http://localhost:8000/api/payway/v1/webhook');
+
+// Problems:
+// - Doesn't work in production (wrong domain)
+// - Doesn't work in local dev (not accessible from internet)
+// - No ngrok support
+// - Must manually change for each environment
+```
+
+**With PaywayCallbackService:**
+```php
+// ✅ Smart - works everywhere automatically
+$returnUrl = PaywayCallbackService::getCallbackUrl('/api/payway/v1/webhook');
+
+// Benefits:
+// ✅ Auto-detects production domain
+// ✅ Auto-detects ngrok in development
+// ✅ Falls back gracefully with warnings
+// ✅ No manual configuration needed (if using auto-detection)
+```
+
+#### Testing the Service
+
+**Test in Tinker:**
+
+```bash
+php artisan tinker
+```
+
+```php
+// Check current environment
+app()->environment(); // "local" or "production"
+
+// Test URL generation
+$url = App\Services\PaywayCallbackService::getCallbackUrl('/api/payway/v1/webhook');
+$decoded = base64_decode($url);
+echo $decoded; // See what URL will be used
+
+// Check if ngrok detected
+// (This will return the ngrok URL if detected, null otherwise)
+```
+
+#### Important Notes
+
+⚠️ **Never commit ngrok URLs to git** - They change every time you restart ngrok (unless using paid plan)
+
+✅ **In production:** Remove `NGROK_URL` from .env entirely
+
+✅ **The service automatically handles** different environments - no code changes needed
+
+⚠️ **Watch the logs** - The service logs warnings if it can't determine a public URL
+
+#### Troubleshooting
+
+**Issue: "No ngrok URL detected" warning**
+
+**Solution:**
+1. Start ngrok: `ngrok http 8000`
+2. Copy the HTTPS URL (e.g., `https://abc123.ngrok.io`)
+3. Add to `.env`: `NGROK_URL=https://abc123.ngrok.io`
+4. Restart Laravel server
+
+**Issue: Webhook still not received**
+
+**Solution:**
+1. Check ngrok is running: `curl http://127.0.0.1:4040/api/tunnels`
+2. Verify URL in PayWay request: Check logs for actual URL sent
+3. Test ngrok URL manually: Visit `https://your-url.ngrok.io` in browser
+4. Check PayWay dashboard for webhook delivery status
+
+---
+
