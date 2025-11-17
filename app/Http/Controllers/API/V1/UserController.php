@@ -91,13 +91,6 @@ class UserController extends Controller
             'avatar' => $request->avatar,
         ]);
 
-        // Log activity
-        activity()
-            ->performedOn($user)
-            ->causedBy($request->user())
-            ->withProperties(['created_user' => $user->only(['name', 'email', 'is_admin'])])
-            ->log('User created');
-
         return response()->jsonSuccess([
             'message' => 'User created successfully',
             'user' => $user,
@@ -147,8 +140,6 @@ class UserController extends Controller
             return response()->jsonError('Validation failed', 422, $validator->errors());
         }
 
-        $oldValues = $user->only(['name', 'email', 'is_admin', 'is_active']);
-
         // Update user
         if ($request->has('name')) {
             $user->name = $request->name;
@@ -180,16 +171,6 @@ class UserController extends Controller
 
         $user->save();
 
-        // Log activity
-        activity()
-            ->performedOn($user)
-            ->causedBy($request->user())
-            ->withProperties([
-                'old' => $oldValues,
-                'new' => $user->only(['name', 'email', 'is_admin', 'is_active']),
-            ])
-            ->log('User updated');
-
         return response()->jsonSuccess([
             'message' => 'User updated successfully',
             'user' => $user,
@@ -217,13 +198,6 @@ class UserController extends Controller
         $user->is_active = false;
         $user->save();
 
-        // Log activity
-        activity()
-            ->performedOn($user)
-            ->causedBy($request->user())
-            ->withProperties(['deactivated_user' => $user->only(['name', 'email'])])
-            ->log('User deactivated');
-
         return response()->jsonSuccess([
             'message' => 'User deactivated successfully',
         ]);
@@ -243,13 +217,6 @@ class UserController extends Controller
 
         $user->is_active = true;
         $user->save();
-
-        // Log activity
-        activity()
-            ->performedOn($user)
-            ->causedBy($request->user())
-            ->withProperties(['activated_user' => $user->only(['name', 'email'])])
-            ->log('User activated');
 
         return response()->jsonSuccess([
             'message' => 'User activated successfully',
