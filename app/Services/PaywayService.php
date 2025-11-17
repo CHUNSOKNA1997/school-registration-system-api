@@ -22,7 +22,7 @@ class PaywayService
             $transaction = PaywayTransaction::updateOrCreate(
                 ['payment_id' => $payment->id],
                 [
-                    'tran_id' => $payment->payment_code, // Use payment code as transaction ID
+                    'tran_id' => $payment->payment_code,
                     'amount' => $payment->amount,
                     'status' => 'pending',
                     'expires_at' => now()->addMinutes(config('payway.khqr.qr_expiry_minutes', 15)),
@@ -207,10 +207,9 @@ class PaywayService
         $googlePayToken = '';
         $cancelUrl = '';
 
-        // Hash for QR API (same as hosted payment, no qr_image_template in hash):
-        // reqTime + merchantId + tranId + amount + items + shipping + firstName + lastName + email + phone +
-        // type + paymentOption + callbackUrl + cancelUrl + continueUrl + returnDeeplink + currency + customFields +
-        // returnParams + payout + lifetime + additionalParams + googlePayToken
+        /**
+         * Hash format
+         */
         $dataToHash = $reqTime . $merchantId . $transactionId . $amount . $items .
                      $shipping . $firstName . $lastName . $email . $phone .
                      $type . $paymentOption . $callbackUrl . $cancelUrl . $continueUrl .
@@ -430,7 +429,7 @@ class PaywayService
     }
 
     /**
-     * Generate hash for hosted payment page (matching Sakal's format)
+     * Generate hash for hosted payment page
      */
     private function generateHashForHostedPage(...$params): string
     {

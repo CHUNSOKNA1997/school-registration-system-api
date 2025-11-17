@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\ClassroomController;
+use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\API\StudentController;
 use App\Http\Controllers\API\StudentSubjectController;
 use App\Http\Controllers\API\SubjectController;
 use App\Http\Controllers\API\TeacherController;
+use App\Http\Controllers\API\V1\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'v1', 'as' => 'v1.'], function () {
@@ -21,14 +23,24 @@ Route::group(['prefix' => 'v1', 'as' => 'v1.'], function () {
         });
     });
 
-    // Protected resource routes
+    // Protected resource routes (Staff & Admin)
     Route::middleware(['auth:sanctum'])->group(function () {
-        Route::apiResource('students', StudentController::class);
-        Route::apiResource('teachers', TeacherController::class);
-        Route::apiResource('classrooms', ClassroomController::class);
-        Route::apiResource('subjects', SubjectController::class);
+        // Dashboard
+        Route::get('dashboard', [DashboardController::class, 'index']);
+        Route::get('dashboard/registration-trends', [DashboardController::class, 'registrationTrends']);
+        Route::get('dashboard/payment-trends', [DashboardController::class, 'paymentTrends']);
+        Route::get('dashboard/top-students', [DashboardController::class, 'topStudents']);
 
-        // Student-Subject enrollment routes
+        // Profile
+        Route::get('profile', [UserController::class, 'profile']);
+        Route::put('profile', [UserController::class, 'updateProfile']);
+
+        // Students - Staff can create/view, Admin can update/delete
+        Route::get('students', [StudentController::class, 'index']);
+        Route::get('students/{student}', [StudentController::class, 'show']);
+        Route::post('students', [StudentController::class, 'store']);
+
+        // Student-Subject enrollment routes (Staff & Admin)
         Route::prefix('students/{student}')->group(function () {
             Route::get('enrollments', [StudentSubjectController::class, 'index']);
             Route::post('enrollments', [StudentSubjectController::class, 'store']);
@@ -37,7 +49,26 @@ Route::group(['prefix' => 'v1', 'as' => 'v1.'], function () {
             Route::get('transcript', [StudentSubjectController::class, 'transcript']);
         });
 
-        // Bulk enrollment
+        // Bulk enrollment (Staff & Admin)
         Route::post('enrollments/bulk', [StudentSubjectController::class, 'bulkEnroll']);
+    });
+
+    // Admin-only routes
+    Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+        // Students - Update/Delete (Admin only)
+        Route::put('students/{student}', [StudentController::class, 'update']);
+        Route::delete('students/{student}', [StudentController::class, 'destroy']);
+
+        // User Management (Admin only)
+        Route::get('users', [UserController::class, 'index']);
+        Route::post('users', [UserController::class, 'store']);
+        Route::get('users/{id}', [UserController::class, 'show']);
+        Route::put('users/{id}', [UserController::class, 'update']);
+        Route::delete('users/{id}', [UserController::class, 'destroy']);
+        Route::post('users/{id}/activate', [UserController::class, 'activate']);
+
+        Route::apiResource('teachers', TeacherController::class);
+        Route::apiResource('classrooms', ClassroomController::class);
+        Route::apiResource('subjects', SubjectController::class);
     });
 });
