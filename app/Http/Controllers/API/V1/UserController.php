@@ -81,7 +81,6 @@ class UserController extends Controller
         }
 
         $user = User::create([
-            'uuid' => \Illuminate\Support\Str::uuid(),
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
