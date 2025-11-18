@@ -1,92 +1,112 @@
 import { Link, usePage } from '@inertiajs/react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 export default function AuthenticatedLayout({ children }) {
     const { auth } = usePage().props;
+    const currentPath = window.location.pathname;
+
+    const navigation = [
+        { name: 'Dashboard', href: '/dashboard' },
+        { name: 'Students', href: '/students' },
+        { name: 'Teachers', href: '/teachers', adminOnly: true },
+        { name: 'Subjects', href: '/subjects', adminOnly: true },
+        { name: 'Classes', href: '/classes' },
+    ];
+
+    const management = [
+        { name: 'Payments', href: '/payments' },
+        { name: 'Reports', href: '/reports', adminOnly: true },
+        { name: 'Users', href: '/users', adminOnly: true },
+        { name: 'Settings', href: '/settings' },
+    ];
 
     return (
-        <div className="min-h-screen bg-gray-100">
-            {/* Navigation */}
-            <nav className="bg-white border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16">
-                        <div className="flex">
-                            {/* Logo */}
-                            <div className="flex-shrink-0 flex items-center">
-                                <Link href="/" className="text-xl font-bold text-gray-800">
-                                    School Registration System
-                                </Link>
-                            </div>
+        <div className="min-h-screen bg-[#0a0a0a] text-white">
+            {/* Sidebar */}
+            <aside className="fixed inset-y-0 left-0 z-50 w-[280px] bg-[#111111] border-r border-white/10">
+                <div className="flex flex-col h-full">
+                    {/* Logo */}
+                    <div className="flex items-center h-16 px-6 border-b border-white/10">
+                        <Link href="/dashboard" className="flex items-center space-x-2 group">
+                            <div className="w-6 h-6 rounded-full border-2 border-white/30"></div>
+                            <span className="text-base font-medium text-white">School SRS</span>
+                        </Link>
+                    </div>
 
-                            {/* Navigation Links */}
-                            <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                                <Link
-                                    href="/dashboard"
-                                    className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out"
-                                >
-                                    Dashboard
-                                </Link>
-                                <Link
-                                    href="/students"
-                                    className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out"
-                                >
-                                    Students
-                                </Link>
-                                {auth.user?.is_admin && (
-                                    <>
+                    {/* Navigation */}
+                    <div className="flex-1 overflow-y-auto">
+                        <div className="px-3 py-4">
+                            <p className="px-3 text-xs font-medium text-white/40 uppercase tracking-wider mb-2">Main</p>
+                            <nav className="space-y-0.5">
+                                {navigation.map((item) => {
+                                    if (item.adminOnly && !auth.user?.is_admin) return null;
+                                    const isActive = currentPath === item.href;
+
+                                    return (
                                         <Link
-                                            href="/users"
-                                            className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out"
+                                            key={item.name}
+                                            href={item.href}
+                                            className={`flex items-center px-3 py-2 text-sm font-normal rounded-lg transition-colors ${
+                                                isActive
+                                                    ? 'bg-white/10 text-white'
+                                                    : 'text-white/60 hover:bg-white/5 hover:text-white/80'
+                                            }`}
                                         >
-                                            Users
+                                            <span>{item.name}</span>
                                         </Link>
-                                        <Link
-                                            href="/teachers"
-                                            className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out"
-                                        >
-                                            Teachers
-                                        </Link>
-                                        <Link
-                                            href="/subjects"
-                                            className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out"
-                                        >
-                                            Subjects
-                                        </Link>
-                                    </>
-                                )}
-                            </div>
+                                    );
+                                })}
+                            </nav>
                         </div>
 
-                        {/* User Dropdown */}
-                        <div className="hidden sm:flex sm:items-center sm:ml-6">
-                            <div className="ml-3 relative">
-                                <div className="flex items-center space-x-3">
-                                    <span className="text-sm text-gray-700">{auth.user?.name}</span>
-                                    {auth.user?.is_admin && (
-                                        <span className="px-2 py-1 text-xs font-semibold text-white bg-blue-600 rounded">
-                                            Admin
-                                        </span>
-                                    )}
-                                    <Link
-                                        href="/logout"
-                                        method="post"
-                                        as="button"
-                                        className="text-sm text-gray-700 hover:text-gray-900"
-                                    >
-                                        Logout
-                                    </Link>
-                                </div>
-                            </div>
+                        <div className="px-3 py-4">
+                            <p className="px-3 text-xs font-medium text-white/40 uppercase tracking-wider mb-2">Management</p>
+                            <nav className="space-y-0.5">
+                                {management.map((item) => {
+                                    if (item.adminOnly && !auth.user?.is_admin) return null;
+                                    const isActive = currentPath === item.href;
+
+                                    return (
+                                        <Link
+                                            key={item.name}
+                                            href={item.href}
+                                            className={`flex items-center px-3 py-2 text-sm font-normal rounded-lg transition-colors ${
+                                                isActive
+                                                    ? 'bg-white/10 text-white'
+                                                    : 'text-white/60 hover:bg-white/5 hover:text-white/80'
+                                            }`}
+                                        >
+                                            <span>{item.name}</span>
+                                        </Link>
+                                    );
+                                })}
+                            </nav>
                         </div>
                     </div>
-                </div>
-            </nav>
 
-            {/* Page Content */}
-            <main className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    {children}
+                    {/* User Info */}
+                    <div className="p-4 border-t border-white/10">
+                        <Link
+                            href="/logout"
+                            method="post"
+                            as="button"
+                            className="w-full"
+                        >
+                            <Button variant="ghost" size="sm" className="w-full justify-start text-white/60 hover:text-white hover:bg-white/5">
+                                <span className="text-sm">Logout</span>
+                            </Button>
+                        </Link>
+                    </div>
                 </div>
-            </main>
+            </aside>
+
+            {/* Main Content */}
+            <div className="pl-[280px]">
+                <main className="min-h-screen bg-[#0a0a0a]">
+                    {children}
+                </main>
+            </div>
         </div>
     );
 }
