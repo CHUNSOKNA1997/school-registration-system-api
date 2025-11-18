@@ -1,12 +1,12 @@
 <?php
 
-use App\Http\Controllers\API\AuthController;
-use App\Http\Controllers\API\ClassroomController;
-use App\Http\Controllers\API\DashboardController;
-use App\Http\Controllers\API\StudentController;
-use App\Http\Controllers\API\StudentSubjectController;
-use App\Http\Controllers\API\SubjectController;
-use App\Http\Controllers\API\TeacherController;
+use App\Http\Controllers\API\V1\AuthController;
+use App\Http\Controllers\API\V1\ClassroomController;
+use App\Http\Controllers\API\V1\DashboardController;
+use App\Http\Controllers\API\V1\StudentController;
+use App\Http\Controllers\API\V1\StudentSubjectController;
+use App\Http\Controllers\API\V1\SubjectController;
+use App\Http\Controllers\API\V1\TeacherController;
 use App\Http\Controllers\API\V1\UserController;
 use Illuminate\Support\Facades\Route;
 
