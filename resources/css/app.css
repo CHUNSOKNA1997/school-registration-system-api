@@ -127,12 +127,17 @@
     @apply border-border outline-ring/50;
     }
   html, body {
-    @apply m-0 p-0;
+    @apply m-0 p-0 h-full overflow-x-hidden;
     }
   body {
     @apply bg-background text-foreground;
     }
   #app {
-    @apply m-0 p-0;
+    @apply m-0 p-0 h-full;
+    }
+
+  /* Remove default spacing from full-screen layouts */
+  #app > div {
+    @apply m-0 p-0 leading-none;
     }
 }

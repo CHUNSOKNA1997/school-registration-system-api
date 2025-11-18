@@ -1,87 +1,178 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm } from "@inertiajs/react";
+import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+    Card,
+    CardContent,
+} from "@/components/ui/card";
+import {
+    Field,
+    FieldDescription,
+    FieldGroup,
+    FieldLabel,
+    FieldError,
+} from "@/components/ui/field";
 
 export default function Login() {
     const { data, setData, post, processing, errors } = useForm({
-        email: '',
-        password: '',
-        remember: false,
+        email: "",
+        password: "",
+        remember: true,
     });
+
+    // Clear password field when errors occur
+    useEffect(() => {
+        if (Object.keys(errors).length > 0) {
+            setData("password", "");
+        }
+    }, [errors]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post('/login');
+        post("/login");
     };
 
     return (
         <>
             <Head title="Login" />
 
-            <div className="min-h-screen flex items-center justify-center bg-gray-100">
-                <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
-                    <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">
-                        School Registration System
-                    </h2>
+            <div className="fixed inset-0 grid lg:grid-cols-2">
+                {/* Left Side - School Image/Branding */}
+                <div className="hidden lg:flex relative bg-[#0a0a0a] items-center justify-center overflow-hidden">
+                    {/* School Image */}
+                    <img
+                        src="/hero-image-login.jpg"
+                        alt="School"
+                        className="absolute inset-0 w-full h-full object-cover"
+                    />
+                    {/* Dark overlay for better text readability */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/50 to-black/60"></div>
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Email */}
+                    {/* Content overlay */}
+                    <div className="relative z-10 max-w-2xl space-y-6 text-center px-8">
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                                Email
-                            </label>
-                            <input
-                                id="email"
-                                type="email"
-                                value={data.email}
-                                onChange={(e) => setData('email', e.target.value)}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2 border"
-                                required
-                            />
-                            {errors.email && (
-                                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-                            )}
+                            <h1 className="text-4xl font-bold text-white mb-4">
+                                School Registration System
+                            </h1>
+                            <p className="text-lg text-white/90">
+                                Manage your school's student registrations,
+                                payments, and academic records all in one place.
+                            </p>
                         </div>
+                    </div>
+                </div>
 
-                        {/* Password */}
-                        <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                                Password
-                            </label>
-                            <input
-                                id="password"
-                                type="password"
-                                value={data.password}
-                                onChange={(e) => setData('password', e.target.value)}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-4 py-2 border"
-                                required
-                            />
-                            {errors.password && (
-                                <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-                            )}
-                        </div>
+                {/* Right Side - Login Form */}
+                <div className="flex items-center justify-center p-8 bg-[#0a0a0a]">
+                    <Card className="w-full max-w-md bg-[#1a1a1a] border-white/10 overflow-hidden p-0">
+                        <CardContent className="p-6 md:p-8">
+                            <form onSubmit={handleSubmit}>
+                                <FieldGroup>
+                                    <div className="flex flex-col items-center gap-2 text-center">
+                                        <h1 className="text-2xl font-bold text-white">
+                                            Welcome Back
+                                        </h1>
+                                        <p className="text-white/60 text-balance">
+                                            Enter your credentials to access your account
+                                        </p>
+                                    </div>
 
-                        {/* Remember Me */}
-                        <div className="flex items-center">
-                            <input
-                                id="remember"
-                                type="checkbox"
-                                checked={data.remember}
-                                onChange={(e) => setData('remember', e.target.checked)}
-                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                            />
-                            <label htmlFor="remember" className="ml-2 block text-sm text-gray-700">
-                                Remember me
-                            </label>
-                        </div>
+                                    {/* Email Field */}
+                                    <Field>
+                                        <FieldLabel htmlFor="email" className="text-white/80">
+                                            Email
+                                        </FieldLabel>
+                                        <Input
+                                            id="email"
+                                            type="email"
+                                            placeholder="name@example.com"
+                                            value={data.email}
+                                            onChange={(e) =>
+                                                setData("email", e.target.value)
+                                            }
+                                            className="bg-[#0a0a0a] border-white/10 text-white placeholder:text-white/40 focus:border-white/30"
+                                            required
+                                        />
+                                        {errors.email && (
+                                            <FieldError className="text-red-400">
+                                                {errors.email}
+                                            </FieldError>
+                                        )}
+                                    </Field>
 
-                        {/* Submit Button */}
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-                        >
-                            {processing ? 'Logging in...' : 'Log in'}
-                        </button>
-                    </form>
+                                    {/* Password Field */}
+                                    <Field>
+                                        <div className="flex items-center">
+                                            <FieldLabel htmlFor="password" className="text-white/80">
+                                                Password
+                                            </FieldLabel>
+                                            <a
+                                                href="#"
+                                                className="ml-auto text-sm text-white/60 hover:text-white underline-offset-2 hover:underline"
+                                            >
+                                                Forgot your password?
+                                            </a>
+                                        </div>
+                                        <Input
+                                            id="password"
+                                            type="password"
+                                            placeholder="Enter your password"
+                                            value={data.password}
+                                            onChange={(e) =>
+                                                setData("password", e.target.value)
+                                            }
+                                            className="bg-[#0a0a0a] border-white/10 text-white placeholder:text-white/40 focus:border-white/30"
+                                            required
+                                        />
+                                        {errors.password && (
+                                            <FieldError className="text-red-400">
+                                                {errors.password}
+                                            </FieldError>
+                                        )}
+                                    </Field>
+
+                                    {/* Remember Me */}
+                                    <div className="flex items-center space-x-2">
+                                        <input
+                                            id="remember"
+                                            type="checkbox"
+                                            checked={data.remember}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "remember",
+                                                    e.target.checked
+                                                )
+                                            }
+                                            className="h-4 w-4 rounded border-white/10 bg-[#0a0a0a] text-white focus:ring-white/20 focus:ring-offset-0"
+                                        />
+                                        <FieldLabel
+                                            htmlFor="remember"
+                                            className="text-sm text-white/60 font-normal cursor-pointer"
+                                        >
+                                            Remember me for 30 days
+                                        </FieldLabel>
+                                    </div>
+
+                                    {/* Submit Button */}
+                                    <Field>
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                            className="w-full bg-white text-black hover:bg-white/90 font-medium cursor-pointer"
+                                        >
+                                            {processing ? "Signing in..." : "Sign in"}
+                                        </Button>
+                                    </Field>
+
+                                    {/* Help Text */}
+                                    <FieldDescription className="text-center text-white/40">
+                                        Contact your school administrator for access
+                                    </FieldDescription>
+                                </FieldGroup>
+                            </form>
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
         </>
