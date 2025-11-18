@@ -2,10 +2,7 @@ import { Head, useForm } from "@inertiajs/react";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-    Card,
-    CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
     Field,
     FieldDescription,
@@ -74,13 +71,17 @@ export default function Login() {
                                             Welcome Back
                                         </h1>
                                         <p className="text-white/60 text-balance">
-                                            Enter your credentials to access your account
+                                            Enter your credentials to access
+                                            your account
                                         </p>
                                     </div>
 
                                     {/* Email Field */}
                                     <Field>
-                                        <FieldLabel htmlFor="email" className="text-white/80">
+                                        <FieldLabel
+                                            htmlFor="email"
+                                            className="text-white/80"
+                                        >
                                             Email
                                         </FieldLabel>
                                         <Input
@@ -104,7 +105,10 @@ export default function Login() {
                                     {/* Password Field */}
                                     <Field>
                                         <div className="flex items-center">
-                                            <FieldLabel htmlFor="password" className="text-white/80">
+                                            <FieldLabel
+                                                htmlFor="password"
+                                                className="text-white/80"
+                                            >
                                                 Password
                                             </FieldLabel>
                                             <a
@@ -120,7 +124,10 @@ export default function Login() {
                                             placeholder="Enter your password"
                                             value={data.password}
                                             onChange={(e) =>
-                                                setData("password", e.target.value)
+                                                setData(
+                                                    "password",
+                                                    e.target.value
+                                                )
                                             }
                                             className="bg-[#0a0a0a] border-white/10 text-white placeholder:text-white/40 focus:border-white/30"
                                             required
@@ -161,13 +168,16 @@ export default function Login() {
                                             disabled={processing}
                                             className="w-full bg-white text-black hover:bg-white/90 font-medium cursor-pointer"
                                         >
-                                            {processing ? "Signing in..." : "Sign in"}
+                                            {processing
+                                                ? "Signing in..."
+                                                : "Sign in"}
                                         </Button>
                                     </Field>
 
                                     {/* Help Text */}
                                     <FieldDescription className="text-center text-white/40">
-                                        Contact your school administrator for access
+                                        Contact your school administrator for
+                                        access
                                     </FieldDescription>
                                 </FieldGroup>
                             </form>

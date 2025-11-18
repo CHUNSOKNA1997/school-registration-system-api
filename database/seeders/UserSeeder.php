@@ -18,7 +18,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Admin User',
             'email' => 'admin@school.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('12345678'),
             'is_admin' => true,
             'is_active' => true,
             'phone' => '012345678',
@@ -28,7 +28,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Staff User',
             'email' => 'staff@school.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('12345password678'),
             'is_admin' => false,
             'is_active' => true,
             'phone' => '012345679',
@@ -38,7 +38,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'John Doe',
             'email' => 'john@school.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('12345678'),
             'is_admin' => false,
             'is_active' => true,
             'phone' => '012345680',
@@ -47,7 +47,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Jane Smith',
             'email' => 'jane@school.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('12345678'),
             'is_admin' => true,
             'is_active' => true,
             'phone' => '012345681',
