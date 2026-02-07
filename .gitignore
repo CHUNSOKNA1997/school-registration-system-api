@@ -24,5 +24,4 @@ Homestead.yaml
 Thumbs.db
 credential_info.txt
 
-# Phase 2 Software Design Documentation
-/docs/phase2
+/docs/*
