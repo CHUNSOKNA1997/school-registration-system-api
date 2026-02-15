@@ -1,6 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Toaster } from '@/components/ui/sonner';
 
 export default function AuthenticatedLayout({ children }) {
     const { auth } = usePage().props;
@@ -22,7 +23,9 @@ export default function AuthenticatedLayout({ children }) {
     ];
 
     return (
-        <div className="min-h-screen bg-[#0a0a0a] text-white">
+        <>
+            <Toaster position="top-right" />
+            <div className="min-h-screen bg-[#0a0a0a] text-white">
             {/* Sidebar */}
             <aside className="fixed inset-y-0 left-0 z-50 w-[280px] bg-[#111111] border-r border-white/10">
                 <div className="flex flex-col h-full">
@@ -108,5 +111,6 @@ export default function AuthenticatedLayout({ children }) {
                 </main>
             </div>
         </div>
+        </>
     );
 }
