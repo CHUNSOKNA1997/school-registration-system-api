@@ -154,7 +154,7 @@ class Student extends Model
     public static function generateStudentCode()
     {
         $year = date('Y');
-        $lastStudent = self::where('student_code', 'like', "STU{$year}-%")
+        $lastStudent = static::query()->where('student_code', 'like', "STU{$year}-%")
             ->orderBy('student_code', 'desc')
             ->first();
 

@@ -1,261 +1,245 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
+    Table, TableBody, TableCell, TableHead,
+    TableHeadCell, TableRow,
+} from 'flowbite-react';
+import { toast } from 'sonner';
+import { Users, ArrowLeft, Pencil, Trash2, BookOpen } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
+import StatusBadge from '@/components/StatusBadge';
+import ConfirmDialog from '@/components/ConfirmDialog';
+
+function InfoItem({ label, value, className = '' }) {
+    return (
+        <div>
+            <p className="mb-0.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+            <p className={`text-sm text-foreground ${className}`}>{value ?? '—'}</p>
+        </div>
+    );
+}
 
 export default function ShowStudent({ auth, student }) {
-    const getStatusBadge = (status) => {
-        const variants = {
-            active: 'bg-green-600/20 text-green-400 border-green-600/30',
-            inactive: 'bg-gray-600/20 text-gray-400 border-gray-600/30',
-            graduated: 'bg-blue-600/20 text-blue-400 border-blue-600/30',
-            suspended: 'bg-red-600/20 text-red-400 border-red-600/30',
-        };
+    const [deleteDialog, setDeleteDialog] = useState(false);
+    const [deleting, setDeleting] = useState(false);
 
-        return (
-            <Badge className={`${variants[status] || variants.active} border`}>
-                {status?.charAt(0).toUpperCase() + status?.slice(1)}
-            </Badge>
-        );
+    const handleDelete = () => {
+        setDeleting(true);
+        router.delete(`/students/${student.id}`, {
+            onSuccess: () => toast.success('Student deleted'),
+            onError: () => toast.error('Failed to delete student'),
+            onFinish: () => setDeleting(false),
+        });
     };
 
     return (
         <AuthenticatedLayout>
             <Head title={`${student.first_name} ${student.last_name}`} />
 
-            <div className="p-8 space-y-6">
-                {/* Header */}
-                <div className="flex items-center justify-between">
-                    <div>
-                        <div className="flex items-center gap-3">
-                            <h1 className="text-2xl font-semibold text-white">
-                                {student.first_name} {student.last_name}
-                            </h1>
-                            {getStatusBadge(student.status)}
-                        </div>
-                        <p className="text-sm text-white/60 mt-1">
-                            Student Code: {student.student_code}
-                        </p>
-                    </div>
-                    <div className="flex gap-2">
-                        <Link href={`/students/${student.id}/enrollments`}>
-                            <Button variant="outline" className="bg-white/5 border-white/10 text-white">
-                                Manage Enrollments
-                            </Button>
-                        </Link>
-                        <Link href={`/students/${student.id}/edit`}>
-                            <Button variant="outline" className="bg-white/5 border-white/10 text-white">
-                                Edit
-                            </Button>
-                        </Link>
-                        <Link href="/students">
-                            <Button variant="ghost" className="text-white/60 hover:text-white">
-                                Back
-                            </Button>
-                        </Link>
-                    </div>
-                </div>
+            <PageHeader
+                icon={Users}
+                title={`${student.first_name} ${student.last_name}`}
+                description={`Student Code: ${student.student_code}`}
+            >
+                <Button variant="outline" onClick={() => router.get('/students')}>
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Back
+                </Button>
+                <Link href={`/students/${student.id}/enrollments`}>
+                    <Button variant="outline">
+                        <BookOpen className="mr-2 h-4 w-4" />
+                        Enrollments
+                    </Button>
+                </Link>
+                <Link href={`/students/${student.id}/edit`}>
+                    <Button>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Edit
+                    </Button>
+                </Link>
+                {auth.user?.is_admin && (
+                    <Button
+                        variant="outline"
+                        className="text-destructive border-destructive/30 hover:bg-destructive/5"
+                        onClick={() => setDeleteDialog(true)}
+                    >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Delete
+                    </Button>
+                )}
+            </PageHeader>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Main Info - 2 columns */}
-                    <div className="lg:col-span-2 space-y-6">
-                        {/* Personal Information */}
-                        <Card className="bg-[#1a1a1a] border-white/10">
-                            <CardHeader>
-                                <CardTitle className="text-lg font-semibold text-white">
-                                    Personal Information
+            {/* Status badge inline below header */}
+            <div className="mb-6 -mt-2">
+                <StatusBadge status={student.status} />
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                {/* Left (2/3) */}
+                <div className="space-y-6 lg:col-span-2">
+                    {/* Personal */}
+                    <Card>
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                                Personal Information
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid grid-cols-2 gap-5">
+                            <InfoItem label="Full Name (EN)" value={`${student.first_name} ${student.last_name}`} />
+                            <InfoItem label="Full Name (KH)" value={student.khmer_name} />
+                            <InfoItem label="Date of Birth" value={student.date_of_birth} />
+                            <InfoItem label="Place of Birth" value={student.place_of_birth} />
+                            <InfoItem label="Gender" value={student.gender} className="capitalize" />
+                            <InfoItem label="Nationality" value={student.nationality} />
+                            <InfoItem label="Student Type" value={student.student_type} className="capitalize" />
+                        </CardContent>
+                    </Card>
+
+                    {/* Contact */}
+                    <Card>
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                                Contact Information
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid grid-cols-2 gap-5">
+                            <InfoItem label="Phone" value={student.phone} />
+                            <InfoItem label="Email" value={student.email} />
+                            <div className="col-span-2">
+                                <InfoItem label="Current Address" value={student.current_address} />
+                            </div>
+                            <div className="col-span-2">
+                                <InfoItem label="Permanent Address" value={student.permanent_address} />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Parent */}
+                    <Card>
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                                Parent / Guardian
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid grid-cols-2 gap-5">
+                            <InfoItem label="Parent Name" value={student.parent_name} />
+                            <InfoItem label="Parent Phone" value={student.parent_phone} />
+                            <InfoItem label="Parent Occupation" value={student.parent_occupation} />
+                            <InfoItem label="Emergency Contact" value={student.emergency_contact} />
+                            <div className="col-span-2">
+                                <InfoItem label="Emergency Contact Relationship" value={student.emergency_contact_relationship} />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Enrollments */}
+                    {student.enrollments?.length > 0 && (
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between pb-3">
+                                <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                                    Current Enrollments
                                 </CardTitle>
+                                <Link href={`/students/${student.id}/enrollments`}>
+                                    <Button size="sm" variant="ghost" className="text-primary">View All</Button>
+                                </Link>
                             </CardHeader>
-                            <CardContent>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <InfoItem label="Full Name (EN)" value={`${student.first_name} ${student.last_name}`} />
-                                    <InfoItem label="Full Name (KH)" value={student.khmer_name} />
-                                    <InfoItem label="Date of Birth" value={student.date_of_birth} />
-                                    <InfoItem label="Place of Birth" value={student.place_of_birth} />
-                                    <InfoItem label="Gender" value={student.gender} className="capitalize" />
-                                    <InfoItem label="Nationality" value={student.nationality} />
-                                    <InfoItem label="Student Type" value={student.student_type} className="capitalize" />
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        {/* Contact Information */}
-                        <Card className="bg-[#1a1a1a] border-white/10">
-                            <CardHeader>
-                                <CardTitle className="text-lg font-semibold text-white">
-                                    Contact Information
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <InfoItem label="Phone" value={student.phone} />
-                                    <InfoItem label="Email" value={student.email} />
-                                    <div className="col-span-2">
-                                        <InfoItem label="Current Address" value={student.current_address} />
-                                    </div>
-                                    <div className="col-span-2">
-                                        <InfoItem label="Permanent Address" value={student.permanent_address} />
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        {/* Parent/Guardian Information */}
-                        <Card className="bg-[#1a1a1a] border-white/10">
-                            <CardHeader>
-                                <CardTitle className="text-lg font-semibold text-white">
-                                    Parent/Guardian Information
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <InfoItem label="Parent Name" value={student.parent_name} />
-                                    <InfoItem label="Parent Phone" value={student.parent_phone} />
-                                    <InfoItem label="Parent Occupation" value={student.parent_occupation} />
-                                    <InfoItem label="Emergency Contact" value={student.emergency_contact} />
-                                    <div className="col-span-2">
-                                        <InfoItem
-                                            label="Emergency Contact Relationship"
-                                            value={student.emergency_contact_relationship}
-                                        />
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        {/* Current Enrollments */}
-                        {student.enrollments && student.enrollments.length > 0 && (
-                            <Card className="bg-[#1a1a1a] border-white/10">
-                                <CardHeader>
-                                    <div className="flex items-center justify-between">
-                                        <CardTitle className="text-lg font-semibold text-white">
-                                            Current Enrollments
-                                        </CardTitle>
-                                        <Link href={`/students/${student.id}/enrollments`}>
-                                            <Button size="sm" variant="ghost" className="text-white/60 hover:text-white">
-                                                View All
-                                            </Button>
-                                        </Link>
-                                    </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <Table>
-                                        <TableHeader>
+                            <CardContent className="p-0">
+                                <div className="overflow-x-auto">
+                                    <Table hoverable>
+                                        <TableHead>
                                             <TableRow>
-                                                <TableHead>Subject</TableHead>
-                                                <TableHead>Teacher</TableHead>
-                                                <TableHead>Grade</TableHead>
-                                                <TableHead>Status</TableHead>
+                                                <TableHeadCell>Subject</TableHeadCell>
+                                                <TableHeadCell>Teacher</TableHeadCell>
+                                                <TableHeadCell>Grade</TableHeadCell>
+                                                <TableHeadCell>Status</TableHeadCell>
                                             </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {student.enrollments.slice(0, 5).map((enrollment) => (
-                                                <TableRow key={enrollment.id}>
-                                                    <TableCell className="font-medium">
-                                                        {enrollment.subject?.name_en}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {enrollment.teacher?.first_name}{' '}
-                                                        {enrollment.teacher?.last_name}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        {enrollment.grade || 'N/A'}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Badge className="bg-green-600/20 text-green-400 border-green-600/30 border capitalize">
-                                                            {enrollment.status}
-                                                        </Badge>
-                                                    </TableCell>
+                                        </TableHead>
+                                        <TableBody className="divide-y">
+                                            {student.enrollments.slice(0, 5).map((e) => (
+                                                <TableRow key={e.id} className="bg-white">
+                                                    <TableCell className="font-medium text-gray-900">{e.subject?.name_en}</TableCell>
+                                                    <TableCell className="text-gray-600">{e.teacher?.first_name} {e.teacher?.last_name}</TableCell>
+                                                    <TableCell className="text-gray-600">{e.grade ?? '—'}</TableCell>
+                                                    <TableCell><StatusBadge status={e.status} /></TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
                                     </Table>
-                                </CardContent>
-                            </Card>
-                        )}
-                    </div>
-
-                    {/* Sidebar - 1 column */}
-                    <div className="space-y-6">
-                        {/* Academic Information */}
-                        <Card className="bg-[#1a1a1a] border-white/10">
-                            <CardHeader>
-                                <CardTitle className="text-lg font-semibold text-white">
-                                    Academic Information
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-3">
-                                <InfoItem label="Class" value={student.class?.name_en} />
-                                <InfoItem label="Shift" value={student.shift} className="capitalize" />
-                                <InfoItem label="Academic Year" value={student.academic_year} />
-                                <InfoItem label="Registration Date" value={student.registration_date} />
-                                <InfoItem label="Previous School" value={student.previous_school} />
-                            </CardContent>
-                        </Card>
-
-                        {/* Quick Stats */}
-                        <Card className="bg-[#1a1a1a] border-white/10">
-                            <CardHeader>
-                                <CardTitle className="text-lg font-semibold text-white">
-                                    Quick Stats
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-3">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-sm text-white/60">Total Subjects</span>
-                                    <span className="text-lg font-semibold text-white">
-                                        {student.enrollments?.length || 0}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-sm text-white/60">Total Payments</span>
-                                    <span className="text-lg font-semibold text-white">
-                                        {student.payments?.length || 0}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-sm text-white/60">Pending Payments</span>
-                                    <span className="text-lg font-semibold text-red-400">
-                                        {student.payments?.filter(p => p.status === 'pending').length || 0}
-                                    </span>
                                 </div>
                             </CardContent>
                         </Card>
+                    )}
+                </div>
 
-                        {/* Notes */}
-                        {student.notes && (
-                            <Card className="bg-[#1a1a1a] border-white/10">
-                                <CardHeader>
-                                    <CardTitle className="text-lg font-semibold text-white">
-                                        Notes
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-sm text-white/70">{student.notes}</p>
-                                </CardContent>
-                            </Card>
-                        )}
-                    </div>
+                {/* Right sidebar (1/3) */}
+                <div className="space-y-6">
+                    {/* Academic */}
+                    <Card>
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                                Academic Information
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <InfoItem label="Class" value={student.class?.name_en} />
+                            <InfoItem label="Shift" value={student.shift} className="capitalize" />
+                            <InfoItem label="Academic Year" value={student.academic_year} />
+                            <InfoItem label="Registration Date" value={student.registration_date} />
+                            <InfoItem label="Previous School" value={student.previous_school} />
+                        </CardContent>
+                    </Card>
+
+                    {/* Quick Stats */}
+                    <Card>
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                                Quick Stats
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                            {[
+                                { label: 'Total Subjects',   value: student.enrollments?.length ?? 0 },
+                                { label: 'Total Payments',   value: student.payments?.length ?? 0 },
+                                { label: 'Pending Payments', value: student.payments?.filter(p => p.status === 'pending').length ?? 0, danger: true },
+                            ].map(({ label, value, danger }) => (
+                                <div key={label} className="flex items-center justify-between">
+                                    <span className="text-sm text-muted-foreground">{label}</span>
+                                    <span className={`text-lg font-semibold ${danger && value > 0 ? 'text-destructive' : 'text-foreground'}`}>
+                                        {value}
+                                    </span>
+                                </div>
+                            ))}
+                        </CardContent>
+                    </Card>
+
+                    {/* Notes */}
+                    {student.notes && (
+                        <Card>
+                            <CardHeader className="pb-3">
+                                <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                                    Notes
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-sm text-muted-foreground leading-relaxed">{student.notes}</p>
+                            </CardContent>
+                        </Card>
+                    )}
                 </div>
             </div>
-        </AuthenticatedLayout>
-    );
-}
 
-function InfoItem({ label, value, className = '' }) {
-    return (
-        <div>
-            <p className="text-xs text-white/40 mb-1">{label}</p>
-            <p className={`text-sm text-white/80 ${className}`}>{value || 'N/A'}</p>
-        </div>
+            <ConfirmDialog
+                open={deleteDialog}
+                onOpenChange={setDeleteDialog}
+                title="Delete Student"
+                description={`Are you sure you want to delete ${student.first_name} ${student.last_name}? This action cannot be undone.`}
+                confirmLabel="Delete"
+                processing={deleting}
+                onConfirm={handleDelete}
+            />
+        </AuthenticatedLayout>
     );
 }
