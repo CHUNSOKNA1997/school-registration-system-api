@@ -1,27 +1,52 @@
+import * as React from "react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head, router } from "@inertiajs/react";
+import { Head } from "@inertiajs/react";
 import {
     Card, CardContent, CardDescription,
     CardHeader, CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-    AreaChart, Area, XAxis, YAxis,
-    CartesianGrid, Tooltip, ResponsiveContainer,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import {
+    ChartContainer,
+    ChartLegend,
+    ChartLegendContent,
+    ChartTooltip,
+    ChartTooltipContent,
+} from "@/components/ui/chart";
+import {
+    AreaChart, Area, XAxis, CartesianGrid,
 } from "recharts";
 import {
     Users, GraduationCap, BookOpen, DollarSign,
-    TrendingUp, TrendingDown, Plus, UserPlus,
+    TrendingUp, TrendingDown,
 } from "lucide-react";
 
 const CHART_DATA = [
-    { month: "Jan", students: 420, revenue: 42000 },
-    { month: "Feb", students: 445, revenue: 44500 },
-    { month: "Mar", students: 480, revenue: 48000 },
-    { month: "Apr", students: 510, revenue: 51000 },
-    { month: "May", students: 545, revenue: 54500 },
-    { month: "Jun", students: 580, revenue: 58000 },
+    { date: "2024-01-01", students: 420, revenue: 42000 },
+    { date: "2024-02-01", students: 445, revenue: 44500 },
+    { date: "2024-03-01", students: 480, revenue: 48000 },
+    { date: "2024-04-01", students: 510, revenue: 51000 },
+    { date: "2024-05-01", students: 545, revenue: 54500 },
+    { date: "2024-06-01", students: 580, revenue: 58000 },
 ];
+
+const chartConfig = {
+    students: {
+        label: "Students",
+        color: "var(--chart-1)",
+    },
+    revenue: {
+        label: "Revenue ($)",
+        color: "var(--chart-5)",
+    },
+};
 
 function StatCard({ title, value, change, trend, description, subtitle, icon: Icon, colorClass, bgClass }) {
     const TrendIcon = trend === "up" ? TrendingUp : TrendingDown;
@@ -53,6 +78,14 @@ function StatCard({ title, value, change, trend, description, subtitle, icon: Ic
 }
 
 export default function Dashboard({ auth, stats }) {
+    const [timeRange, setTimeRange] = React.useState("6m");
+
+    const filteredData = React.useMemo(() => {
+        if (timeRange === "3m") return CHART_DATA.slice(-3);
+        if (timeRange === "1m") return CHART_DATA.slice(-1);
+        return CHART_DATA;
+    }, [timeRange]);
+
     const statCards = [
         {
             title: "Total Students",
@@ -73,8 +106,8 @@ export default function Dashboard({ auth, stats }) {
             description: "faculty members",
             subtitle: "Staff count",
             icon: GraduationCap,
-            colorClass: "text-purple-600",
-            bgClass: "bg-purple-50",
+            colorClass: "text-emerald-600",
+            bgClass: "bg-emerald-50",
         },
         {
             title: "Active Subjects",
@@ -84,8 +117,8 @@ export default function Dashboard({ auth, stats }) {
             description: "course offerings",
             subtitle: "Available courses",
             icon: BookOpen,
-            colorClass: "text-cyan-600",
-            bgClass: "bg-cyan-50",
+            colorClass: "text-amber-600",
+            bgClass: "bg-amber-50",
         },
         {
             title: "Monthly Revenue",
@@ -98,13 +131,6 @@ export default function Dashboard({ auth, stats }) {
             colorClass: "text-emerald-600",
             bgClass: "bg-emerald-50",
         },
-    ];
-
-    const quickActions = [
-        { label: "Add Student",  icon: UserPlus, href: "/students/create" },
-        { label: "All Students", icon: Users,    href: "/students" },
-        { label: "Classes",      icon: BookOpen, href: "/classes" },
-        { label: "Payments",     icon: DollarSign, href: "/payments" },
     ];
 
     return (
@@ -127,80 +153,97 @@ export default function Dashboard({ auth, stats }) {
             </div>
 
             {/* Chart */}
-            <Card className="mb-6">
-                <CardHeader>
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <CardTitle className="text-base font-semibold">Enrollment Trends</CardTitle>
-                            <CardDescription className="mt-0.5">
-                                Student registrations and revenue — last 6 months
-                            </CardDescription>
-                        </div>
-                        <Button variant="outline" size="sm">Last 6 months</Button>
+            <Card className="mb-6 pt-0">
+                <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
+                    <div className="grid flex-1 gap-1">
+                        <CardTitle className="text-base font-semibold">Enrollment Trends</CardTitle>
+                        <CardDescription>
+                            Student registrations and revenue over time
+                        </CardDescription>
                     </div>
+
+                    <Select value={timeRange} onValueChange={setTimeRange}>
+                        <SelectTrigger
+                            className="hidden w-[170px] rounded-lg sm:ml-auto sm:flex"
+                            aria-label="Select time range"
+                        >
+                            <SelectValue placeholder="Last 6 months" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl">
+                            <SelectItem value="6m" className="rounded-lg">Last 6 months</SelectItem>
+                            <SelectItem value="3m" className="rounded-lg">Last 3 months</SelectItem>
+                            <SelectItem value="1m" className="rounded-lg">Last month</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </CardHeader>
-                <CardContent>
-                    <ResponsiveContainer width="100%" height={280}>
-                        <AreaChart data={CHART_DATA} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+
+                <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+                    <ChartContainer config={chartConfig} className="aspect-auto h-[280px] w-full">
+                        <AreaChart data={filteredData}>
                             <defs>
-                                <linearGradient id="gStudents" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%"  stopColor="rgb(37,99,235)"   stopOpacity={0.25} />
-                                    <stop offset="95%" stopColor="rgb(37,99,235)"   stopOpacity={0} />
+                                <linearGradient id="fillStudents" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="var(--color-students)" stopOpacity={0.7} />
+                                    <stop offset="95%" stopColor="var(--color-students)" stopOpacity={0.08} />
                                 </linearGradient>
-                                <linearGradient id="gRevenue" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%"  stopColor="rgb(124,58,237)"  stopOpacity={0.25} />
-                                    <stop offset="95%" stopColor="rgb(124,58,237)"  stopOpacity={0} />
+                                <linearGradient id="fillRevenue" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="var(--color-revenue)" stopOpacity={0.7} />
+                                    <stop offset="95%" stopColor="var(--color-revenue)" stopOpacity={0.08} />
                                 </linearGradient>
                             </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="rgb(226,232,240)" />
-                            <XAxis dataKey="month" stroke="rgb(100,116,139)" style={{ fontSize: 12 }} />
-                            <YAxis stroke="rgb(100,116,139)" style={{ fontSize: 12 }} />
-                            <Tooltip
-                                contentStyle={{
-                                    backgroundColor: "white",
-                                    border: "1px solid rgb(226,232,240)",
-                                    borderRadius: 8,
-                                    boxShadow: "0 4px 6px -1px rgb(0 0 0/0.07)",
-                                    fontSize: 12,
-                                }}
+
+                            <CartesianGrid vertical={false} />
+                            <XAxis
+                                dataKey="date"
+                                tickLine={false}
+                                axisLine={false}
+                                tickMargin={8}
+                                minTickGap={32}
+                                tickFormatter={(value) =>
+                                    new Date(value).toLocaleDateString("en-US", {
+                                        month: "short",
+                                        year: "2-digit",
+                                    })
+                                }
                             />
-                            <Area type="monotone" dataKey="students" stroke="rgb(37,99,235)"  fill="url(#gStudents)" strokeWidth={2} />
-                            <Area type="monotone" dataKey="revenue"  stroke="rgb(124,58,237)" fill="url(#gRevenue)"  strokeWidth={2} />
+                            <ChartTooltip
+                                cursor={false}
+                                content={
+                                    <ChartTooltipContent
+                                        indicator="dot"
+                                        labelFormatter={(value) =>
+                                            new Date(value).toLocaleDateString("en-US", {
+                                                month: "short",
+                                                year: "numeric",
+                                            })
+                                        }
+                                        formatter={(value, name) =>
+                                            name === "revenue"
+                                                ? `$${Number(value).toLocaleString()}`
+                                                : Number(value).toLocaleString()
+                                        }
+                                    />
+                                }
+                            />
+                            <Area
+                                dataKey="students"
+                                type="natural"
+                                fill="url(#fillStudents)"
+                                stroke="var(--color-students)"
+                                strokeWidth={2}
+                            />
+                            <Area
+                                dataKey="revenue"
+                                type="natural"
+                                fill="url(#fillRevenue)"
+                                stroke="var(--color-revenue)"
+                                strokeWidth={2}
+                            />
+                            <ChartLegend content={<ChartLegendContent />} />
                         </AreaChart>
-                    </ResponsiveContainer>
-                    <div className="mt-4 flex items-center justify-center gap-6 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1.5">
-                            <span className="inline-block h-2.5 w-2.5 rounded-full bg-blue-600" />Students
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                            <span className="inline-block h-2.5 w-2.5 rounded-full bg-purple-600" />Revenue ($)
-                        </span>
-                    </div>
+                    </ChartContainer>
                 </CardContent>
             </Card>
 
-            {/* Quick Actions */}
-            <Card>
-                <CardHeader className="pb-3">
-                    <CardTitle className="text-base font-semibold">Quick Actions</CardTitle>
-                    <CardDescription>Common tasks at a glance</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex flex-wrap gap-3">
-                        {quickActions.map(({ label, icon: Icon, href }) => (
-                            <Button
-                                key={label}
-                                variant="outline"
-                                onClick={() => router.get(href)}
-                                className="gap-2"
-                            >
-                                <Icon className="h-4 w-4" />
-                                {label}
-                            </Button>
-                        ))}
-                    </div>
-                </CardContent>
-            </Card>
         </AuthenticatedLayout>
     );
 }

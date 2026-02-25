@@ -1,8 +1,6 @@
 import { Link, usePage, router } from "@inertiajs/react";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
-import { Separator } from "@/components/ui/separator";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -13,6 +11,22 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarGroup,
+    SidebarGroupContent,
+    SidebarGroupLabel,
+    SidebarHeader,
+    SidebarInset,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+    SidebarProvider,
+    SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 import {
     LayoutDashboard,
     Users,
@@ -44,21 +58,27 @@ const MANAGEMENT_ITEMS = [
 
 function NavLink({ item, isActive }) {
     const Icon = item.icon;
+
     return (
-        <Link
-            href={item.href}
-            className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
-                isActive
-                    ? "bg-white text-primary shadow-sm"
-                    : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-            }`}
-        >
-            <Icon className="h-4 w-4 shrink-0" />
-            <span>{item.name}</span>
-            {isActive && (
-                <ChevronRight className="ml-auto h-3 w-3 text-primary/50" />
-            )}
-        </Link>
+        <SidebarMenuItem>
+            <SidebarMenuButton
+                asChild
+                isActive={isActive}
+                className={cn(
+                    "h-10 rounded-xl px-3 text-sm font-medium transition-all duration-150",
+                    "text-sidebar-foreground/80 hover:bg-white/10 hover:text-sidebar-foreground",
+                    "data-[active=true]:bg-white/20 data-[active=true]:text-sidebar-foreground data-[active=true]:shadow-none"
+                )}
+            >
+                <Link href={item.href}>
+                    <Icon className="h-5 w-5 shrink-0" />
+                    <span>{item.name}</span>
+                    {isActive && (
+                        <ChevronRight className="ml-auto h-4 w-4 text-sidebar-foreground/70" />
+                    )}
+                </Link>
+            </SidebarMenuButton>
+        </SidebarMenuItem>
     );
 }
 
@@ -84,55 +104,53 @@ export default function AuthenticatedLayout({ children }) {
         <>
             <Toaster position="top-right" richColors />
 
-            <div className="flex min-h-screen bg-background">
-                {/* ── Sidebar ── */}
-                <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col bg-sidebar shadow-lg">
-                    {/* Logo */}
-                    <div className="flex h-16 shrink-0 items-center gap-3 border-b border-sidebar-border px-5">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15 backdrop-blur-sm">
-                            <School className="h-5 w-5 text-white" />
+            <SidebarProvider defaultOpen>
+                <Sidebar className="shadow-lg" variant="sidebar">
+                    <SidebarHeader className="border-b border-sidebar-border px-5 py-0">
+                        <div className="flex h-16 items-center gap-3">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15 backdrop-blur-sm">
+                                <School className="h-5 w-5 text-white" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-bold leading-none text-sidebar-foreground">
+                                    School SRS
+                                </p>
+                                <p className="mt-0.5 text-[11px] text-sidebar-foreground/60">
+                                    Registration System
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <p className="text-sm font-bold leading-none text-sidebar-foreground">
-                                School SRS
-                            </p>
-                            <p className="mt-0.5 text-[11px] text-sidebar-foreground/60">
-                                Registration System
-                            </p>
-                        </div>
-                    </div>
+                    </SidebarHeader>
 
-                    {/* Nav */}
-                    <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-5">
-                        <div>
-                            <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/50">
+                    <SidebarContent className="px-3 py-5">
+                        <SidebarGroup className="p-0">
+                            <SidebarGroupLabel className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/50">
                                 Main Menu
-                            </p>
-                            <ul className="space-y-0.5">
-                                {filterNav(NAV_ITEMS).map((item) => (
-                                    <li key={item.name}>
-                                        <NavLink item={item} isActive={isActive(item.href)} />
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+                            </SidebarGroupLabel>
+                            <SidebarGroupContent>
+                                <SidebarMenu className="gap-1">
+                                    {filterNav(NAV_ITEMS).map((item) => (
+                                        <NavLink key={item.name} item={item} isActive={isActive(item.href)} />
+                                    ))}
+                                </SidebarMenu>
+                            </SidebarGroupContent>
+                        </SidebarGroup>
 
-                        <div>
-                            <p className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/50">
+                        <SidebarGroup className="mt-3 p-0">
+                            <SidebarGroupLabel className="mb-1.5 px-3 text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/50">
                                 Management
-                            </p>
-                            <ul className="space-y-0.5">
-                                {filterNav(MANAGEMENT_ITEMS).map((item) => (
-                                    <li key={item.name}>
-                                        <NavLink item={item} isActive={isActive(item.href)} />
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </nav>
+                            </SidebarGroupLabel>
+                            <SidebarGroupContent>
+                                <SidebarMenu className="gap-1">
+                                    {filterNav(MANAGEMENT_ITEMS).map((item) => (
+                                        <NavLink key={item.name} item={item} isActive={isActive(item.href)} />
+                                    ))}
+                                </SidebarMenu>
+                            </SidebarGroupContent>
+                        </SidebarGroup>
+                    </SidebarContent>
 
-                    {/* User footer */}
-                    <div className="shrink-0 border-t border-sidebar-border p-3">
+                    <SidebarFooter className="border-t border-sidebar-border p-3">
                         <div className="mb-2 flex items-center gap-3 rounded-lg px-3 py-2.5">
                             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20 text-xs font-bold text-white">
                                 {initials}
@@ -146,23 +164,33 @@ export default function AuthenticatedLayout({ children }) {
                                 </p>
                             </div>
                         </div>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setShowLogoutDialog(true)}
-                            className="w-full justify-start text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                        >
-                            <LogOut className="mr-2 h-4 w-4" />
-                            Logout
-                        </Button>
-                    </div>
-                </aside>
 
-                {/* ── Main Content ── */}
-                <div className="flex flex-1 flex-col pl-64">
-                    <main className="flex-1 p-8">{children}</main>
-                </div>
-            </div>
+                        <SidebarMenu>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    onClick={() => setShowLogoutDialog(true)}
+                                    className="h-9 justify-start text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                                >
+                                    <LogOut className="h-4 w-4" />
+                                    <span>Logout</span>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        </SidebarMenu>
+                    </SidebarFooter>
+                </Sidebar>
+
+                <SidebarInset className="min-h-screen">
+                    <header className="sticky top-0 z-20 flex h-14 items-center border-b bg-background px-4 md:hidden">
+                        <SidebarTrigger className="-ml-1" />
+                        <span className="ml-2 text-sm font-semibold text-foreground">
+                            School SRS
+                        </span>
+                    </header>
+                    <main className="flex-1 p-8">
+                        {children}
+                    </main>
+                </SidebarInset>
+            </SidebarProvider>
 
             {/* Logout confirm */}
             <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>

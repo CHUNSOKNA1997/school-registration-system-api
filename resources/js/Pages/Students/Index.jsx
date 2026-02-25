@@ -3,7 +3,6 @@ import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import {
     Tooltip,
@@ -16,26 +15,15 @@ import {
     TableHeadCell, TableRow,
 } from 'flowbite-react';
 import { toast } from 'sonner';
-import { Users, Plus, Search, X, Eye, Pencil, Trash2 } from 'lucide-react';
+import { Users, Plus, Eye, Pencil, Trash2 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import EmptyState from '@/components/EmptyState';
 import StatusBadge from '@/components/StatusBadge';
 import ConfirmDialog from '@/components/ConfirmDialog';
 
-export default function StudentsIndex({ auth, students, filters }) {
-    const [search, setSearch] = useState(filters?.search || '');
+export default function StudentsIndex({ auth, students }) {
     const [deleteDialog, setDeleteDialog] = useState({ open: false, student: null });
     const [deleting, setDeleting] = useState(false);
-
-    const handleSearch = (e) => {
-        e.preventDefault();
-        router.get('/students', { search }, { preserveState: true });
-    };
-
-    const clearSearch = () => {
-        setSearch('');
-        router.get('/students');
-    };
 
     const openDelete = (student) => setDeleteDialog({ open: true, student });
     const closeDelete = () => setDeleteDialog({ open: false, student: null });
@@ -68,32 +56,9 @@ export default function StudentsIndex({ auth, students, filters }) {
                 </Button>
             </PageHeader>
 
-            {/* Search */}
-            <Card className="mb-6">
-                <CardContent className="p-4">
-                    <form onSubmit={handleSearch} className="flex gap-2">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                className="pl-9"
-                                placeholder="Search by name, student code, or email…"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                            />
-                        </div>
-                        <Button type="submit" variant="secondary">Search</Button>
-                        {search && (
-                            <Button type="button" variant="ghost" size="icon" onClick={clearSearch}>
-                                <X className="h-4 w-4" />
-                            </Button>
-                        )}
-                    </form>
-                </CardContent>
-            </Card>
-
             {/* Table */}
             <Card>
-                <CardHeader className="border-b px-6 py-4">
+                <CardHeader className="border-b px-6">
                     <div className="flex items-center gap-2">
                         <CardTitle className="text-base font-semibold">All Students</CardTitle>
                         <Badge variant="secondary">{students?.data?.length ?? 0}</Badge>

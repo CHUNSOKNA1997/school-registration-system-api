@@ -72,17 +72,17 @@
     --primary: oklch(0.554 0.196 262.881); /* #2563eb - blue-600 */
     --primary-foreground: oklch(1 0 0); /* #ffffff */
 
-    /* Secondary: Purple accent */
-    --secondary: oklch(0.505 0.244 293.756); /* #7c3aed - purple-600 */
+    /* Secondary: Emerald accent */
+    --secondary: oklch(0.646 0.222 149.579); /* #16a34a - green-600 */
     --secondary-foreground: oklch(1 0 0); /* #ffffff */
 
     /* Muted */
     --muted: oklch(0.967 0.002 247.839); /* #f1f5f9 - slate-100 */
     --muted-foreground: oklch(0.556 0.016 257.417); /* #64748b - slate-500 */
 
-    /* Accent: Cyan */
-    --accent: oklch(0.607 0.138 221.503); /* #0891b2 - cyan-600 */
-    --accent-foreground: oklch(1 0 0); /* #ffffff */
+    /* Accent: Soft blue */
+    --accent: oklch(0.932 0.032 255.585); /* #dbeafe - blue-100 */
+    --accent-foreground: oklch(0.488 0.243 264.376); /* #1d4ed8 - blue-700 */
 
     /* Destructive: Red */
     --destructive: oklch(0.577 0.245 27.325); /* #dc2626 - red-600 */
@@ -95,9 +95,9 @@
 
     /* Charts */
     --chart-1: oklch(0.554 0.196 262.881); /* #2563eb - blue-600 */
-    --chart-2: oklch(0.505 0.244 293.756); /* #7c3aed - purple-600 */
-    --chart-3: oklch(0.607 0.138 221.503); /* #0891b2 - cyan-600 */
-    --chart-4: oklch(0.646 0.222 149.579); /* #16a34a - green-600 */
+    --chart-2: oklch(0.646 0.222 149.579); /* #16a34a - green-600 */
+    --chart-3: oklch(0.666 0.179 58.318); /* #d97706 - amber-600 */
+    --chart-4: oklch(0.596 0.145 163.225); /* #0d9488 - teal-600 */
     --chart-5: oklch(0.646 0.222 41.116); /* #ea580c - orange-600 */
 
     /* Sidebar: Blue gradient */
@@ -134,4 +134,23 @@
     #app > div {
         @apply m-0 p-0 leading-none;
     }
+}
+
+.dark {
+    --sidebar:
+        hsl(240 5.9% 10%);
+    --sidebar-foreground:
+        hsl(240 4.8% 95.9%);
+    --sidebar-primary:
+        hsl(224.3 76.3% 48%);
+    --sidebar-primary-foreground:
+        hsl(0 0% 100%);
+    --sidebar-accent:
+        hsl(240 3.7% 15.9%);
+    --sidebar-accent-foreground:
+        hsl(240 4.8% 95.9%);
+    --sidebar-border:
+        hsl(240 3.7% 15.9%);
+    --sidebar-ring:
+        hsl(217.2 91.2% 59.8%);
 }
