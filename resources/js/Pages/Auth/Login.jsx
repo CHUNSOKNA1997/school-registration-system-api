@@ -36,15 +36,15 @@ export default function Login() {
 
             <div className="fixed inset-0 grid lg:grid-cols-2">
                 {/* Left Side - School Image/Branding */}
-                <div className="hidden lg:flex relative bg-[#0a0a0a] items-center justify-center overflow-hidden">
+                <div className="hidden lg:flex relative bg-primary items-center justify-center overflow-hidden">
                     {/* School Image */}
                     <img
                         src="/hero-image-login.jpg"
                         alt="School"
-                        className="absolute inset-0 w-full h-full object-cover"
+                        className="absolute inset-0 w-full h-full object-cover blur-sm"
                     />
-                    {/* Dark overlay for better text readability */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/50 to-black/60"></div>
+                    {/* Subtle overlay for better text readability */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-black/30 to-black/40"></div>
 
                     {/* Content overlay */}
                     <div className="relative z-10 max-w-2xl space-y-6 text-center px-8">
@@ -61,16 +61,16 @@ export default function Login() {
                 </div>
 
                 {/* Right Side - Login Form */}
-                <div className="flex items-center justify-center p-8 bg-[#0a0a0a]">
-                    <Card className="w-full max-w-md bg-[#1a1a1a] border-white/10 overflow-hidden p-0">
+                <div className="flex items-center justify-center p-8 bg-background">
+                    <Card className="w-full max-w-md overflow-hidden p-0">
                         <CardContent className="p-6 md:p-8">
                             <form onSubmit={handleSubmit}>
                                 <FieldGroup>
                                     <div className="flex flex-col items-center gap-2 text-center">
-                                        <h1 className="text-2xl font-bold text-white">
+                                        <h1 className="text-2xl font-bold text-foreground">
                                             Welcome Back
                                         </h1>
-                                        <p className="text-white/60 text-balance">
+                                        <p className="text-muted-foreground text-balance">
                                             Enter your credentials to access
                                             your account
                                         </p>
@@ -78,10 +78,7 @@ export default function Login() {
 
                                     {/* Email Field */}
                                     <Field>
-                                        <FieldLabel
-                                            htmlFor="email"
-                                            className="text-white/80"
-                                        >
+                                        <FieldLabel htmlFor="email">
                                             Email
                                         </FieldLabel>
                                         <Input
@@ -92,11 +89,10 @@ export default function Login() {
                                             onChange={(e) =>
                                                 setData("email", e.target.value)
                                             }
-                                            className="bg-[#0a0a0a] border-white/10 text-white placeholder:text-white/40 focus:border-white/30"
                                             required
                                         />
                                         {errors.email && (
-                                            <FieldError className="text-red-400">
+                                            <FieldError className="text-destructive">
                                                 {errors.email}
                                             </FieldError>
                                         )}
@@ -105,15 +101,12 @@ export default function Login() {
                                     {/* Password Field */}
                                     <Field>
                                         <div className="flex items-center">
-                                            <FieldLabel
-                                                htmlFor="password"
-                                                className="text-white/80"
-                                            >
+                                            <FieldLabel htmlFor="password">
                                                 Password
                                             </FieldLabel>
                                             <a
                                                 href="#"
-                                                className="ml-auto text-sm text-white/60 hover:text-white underline-offset-2 hover:underline"
+                                                className="ml-auto text-sm text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
                                             >
                                                 Forgot your password?
                                             </a>
@@ -126,14 +119,13 @@ export default function Login() {
                                             onChange={(e) =>
                                                 setData(
                                                     "password",
-                                                    e.target.value
+                                                    e.target.value,
                                                 )
                                             }
-                                            className="bg-[#0a0a0a] border-white/10 text-white placeholder:text-white/40 focus:border-white/30"
                                             required
                                         />
                                         {errors.password && (
-                                            <FieldError className="text-red-400">
+                                            <FieldError className="text-destructive">
                                                 {errors.password}
                                             </FieldError>
                                         )}
@@ -148,14 +140,14 @@ export default function Login() {
                                             onChange={(e) =>
                                                 setData(
                                                     "remember",
-                                                    e.target.checked
+                                                    e.target.checked,
                                                 )
                                             }
-                                            className="h-4 w-4 rounded border-white/10 bg-[#0a0a0a] text-white focus:ring-white/20 focus:ring-offset-0"
+                                            className="h-4 w-4 rounded border-border bg-background text-primary focus:ring-ring focus:ring-offset-0"
                                         />
                                         <FieldLabel
                                             htmlFor="remember"
-                                            className="text-sm text-white/60 font-normal cursor-pointer"
+                                            className="text-sm text-muted-foreground font-normal cursor-pointer"
                                         >
                                             Remember me for 30 days
                                         </FieldLabel>
@@ -166,7 +158,7 @@ export default function Login() {
                                         <Button
                                             type="submit"
                                             disabled={processing}
-                                            className="w-full bg-white text-black hover:bg-white/90 font-medium cursor-pointer"
+                                            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium cursor-pointer"
                                         >
                                             {processing
                                                 ? "Signing in..."
@@ -175,7 +167,7 @@ export default function Login() {
                                     </Field>
 
                                     {/* Help Text */}
-                                    <FieldDescription className="text-center text-white/40">
+                                    <FieldDescription className="text-center text-muted-foreground">
                                         Contact your school administrator for
                                         access
                                     </FieldDescription>
