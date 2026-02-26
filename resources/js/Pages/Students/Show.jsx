@@ -67,7 +67,14 @@ export default function ShowStudent({ auth, student }) {
                 )}
             </div>
 
-            <div className="mb-6">
+            <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+                <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Student Profile</p>
+                    <h1 className="mt-1 text-xl font-semibold text-foreground">
+                        {student.first_name} {student.last_name}
+                    </h1>
+                    <p className="text-sm text-muted-foreground">Code: {student.student_code}</p>
+                </div>
                 <StatusBadge status={student.status} />
             </div>
 
@@ -142,7 +149,7 @@ export default function ShowStudent({ auth, student }) {
                             </CardHeader>
                             <CardContent className="p-0">
                                 <div className="overflow-x-auto">
-                                    <Table hoverable>
+                                    <Table hoverable className="text-sm [&_th]:py-3.5 [&_td]:py-3.5">
                                         <TableHead>
                                             <TableRow>
                                                 <TableHeadCell>Subject</TableHeadCell>
@@ -153,7 +160,7 @@ export default function ShowStudent({ auth, student }) {
                                         </TableHead>
                                         <TableBody className="divide-y">
                                             {student.enrollments.slice(0, 5).map((e) => (
-                                                <TableRow key={e.id} className="bg-white">
+                                                <TableRow key={e.id} className="bg-background transition-colors hover:bg-muted/30">
                                                     <TableCell className="font-medium text-gray-900">{e.subject?.name_en}</TableCell>
                                                     <TableCell className="text-gray-600">{e.teacher?.first_name} {e.teacher?.last_name}</TableCell>
                                                     <TableCell className="text-gray-600">{e.grade ?? '—'}</TableCell>

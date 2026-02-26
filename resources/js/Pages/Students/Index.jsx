@@ -57,8 +57,8 @@ export default function StudentsIndex({ auth, students }) {
             </PageHeader>
 
             {/* Table */}
-            <Card>
-                <CardHeader className="border-b px-6">
+            <Card className="py-3">
+                <CardHeader className="grid-rows-[auto] gap-0 border-b px-6 pt-3 pb-2 [.border-b]:pb-2">
                     <div className="flex items-center gap-2">
                         <CardTitle className="text-base font-semibold">All Students</CardTitle>
                         <Badge variant="secondary">{students?.data?.length ?? 0}</Badge>
@@ -83,7 +83,7 @@ export default function StudentsIndex({ auth, students }) {
                                         </TableHead>
                                         <TableBody className="divide-y">
                                             {students.data.map((student) => (
-                                                <TableRow key={student.id} className="border-border bg-background">
+                                                <TableRow key={student.id} className="border-border bg-background transition-colors hover:bg-muted/30">
                                                     <TableCell className="whitespace-nowrap font-mono text-sm font-medium text-primary">
                                                         {student.student_code}
                                                     </TableCell>

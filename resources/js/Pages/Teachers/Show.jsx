@@ -59,7 +59,14 @@ export default function ShowTeacher({ auth, teacher }) {
                 )}
             </div>
 
-            <div className="mb-6">
+            <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+                <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Teacher Profile</p>
+                    <h1 className="mt-1 text-xl font-semibold text-foreground">
+                        {teacher.first_name} {teacher.last_name}
+                    </h1>
+                    <p className="text-sm text-muted-foreground">Code: {teacher.teacher_code}</p>
+                </div>
                 <Badge
                     variant="outline"
                     className={teacher.is_active

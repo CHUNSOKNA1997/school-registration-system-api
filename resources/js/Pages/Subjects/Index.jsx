@@ -57,8 +57,8 @@ export default function SubjectsIndex({ auth, subjects }) {
                 </Button>
             </PageHeader>
 
-            <Card>
-                <CardHeader className="border-b px-6">
+            <Card className="gap-0 py-0">
+                <CardHeader className="border-b px-6 py-4">
                     <div className="flex items-center gap-2">
                         <CardTitle className="text-base font-semibold">All Subjects</CardTitle>
                         <Badge variant="secondary">{subjects?.data?.length ?? 0}</Badge>
@@ -69,7 +69,7 @@ export default function SubjectsIndex({ auth, subjects }) {
                         <>
                             <div className="overflow-x-auto">
                                 <TooltipProvider>
-                                    <Table striped hoverable className="text-sm">
+                                    <Table striped hoverable className="text-sm [&_th]:py-3.5 [&_td]:py-3.5">
                                         <TableHead>
                                             <TableRow>
                                                 <TableHeadCell className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">Code</TableHeadCell>
@@ -84,7 +84,7 @@ export default function SubjectsIndex({ auth, subjects }) {
                                         </TableHead>
                                         <TableBody className="divide-y">
                                             {subjects.data.map((subject) => (
-                                                <TableRow key={subject.id} className="border-border bg-background">
+                                                <TableRow key={subject.id} className="border-border bg-background transition-colors hover:bg-muted/30">
                                                     <TableCell className="font-mono text-sm font-medium text-primary">{subject.subject_code}</TableCell>
                                                     <TableCell>
                                                         <p className="font-medium text-foreground">{subject.name}</p>

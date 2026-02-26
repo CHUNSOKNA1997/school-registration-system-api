@@ -48,6 +48,7 @@ export default function ClassesIndex({ auth, classrooms }) {
                 icon={School}
                 title="Classes"
                 description="Manage class groups and capacity"
+                className="mb-4"
             >
                 <Button onClick={() => router.get('/classes/create')}>
                     <Plus className="mr-2 h-4 w-4" />
@@ -55,8 +56,8 @@ export default function ClassesIndex({ auth, classrooms }) {
                 </Button>
             </PageHeader>
 
-            <Card>
-                <CardHeader className="border-b px-6">
+            <Card className="gap-0 py-0">
+                <CardHeader className="border-b px-6 py-4">
                     <div className="flex items-center gap-2">
                         <CardTitle className="text-base font-semibold">All Classes</CardTitle>
                         <Badge variant="secondary">{classrooms?.data?.length ?? 0}</Badge>
@@ -67,7 +68,7 @@ export default function ClassesIndex({ auth, classrooms }) {
                         <>
                             <div className="overflow-x-auto">
                                 <TooltipProvider>
-                                    <Table striped hoverable className="text-sm">
+                                    <Table striped hoverable className="text-sm [&_th]:py-3.5 [&_td]:py-3.5">
                                         <TableHead>
                                             <TableRow>
                                                 <TableHeadCell className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">Name</TableHeadCell>
@@ -82,7 +83,7 @@ export default function ClassesIndex({ auth, classrooms }) {
                                         </TableHead>
                                         <TableBody className="divide-y">
                                             {classrooms.data.map((classroom) => (
-                                                <TableRow key={classroom.id} className="border-border bg-background">
+                                                <TableRow key={classroom.id} className="border-border bg-background transition-colors hover:bg-muted/30">
                                                     <TableCell className="font-medium text-foreground">{classroom.name}</TableCell>
                                                     <TableCell className="text-sm text-muted-foreground">{classroom.grade_level}</TableCell>
                                                     <TableCell className="text-sm text-muted-foreground">{classroom.section}</TableCell>

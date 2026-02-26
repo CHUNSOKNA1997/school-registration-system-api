@@ -62,6 +62,14 @@ export default function ShowClass({ auth, classroom }) {
                 )}
             </div>
 
+            <div className="mb-6">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Class Details</p>
+                <h1 className="mt-1 text-xl font-semibold text-foreground">{classroom.name}</h1>
+                <p className="text-sm text-muted-foreground">
+                    Grade {classroom.grade_level} · Section {classroom.section}
+                </p>
+            </div>
+
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 <div className="space-y-6 lg:col-span-2">
                     <Card>
@@ -95,7 +103,7 @@ export default function ShowClass({ auth, classroom }) {
                         <CardContent className="p-0">
                             {classroom.students?.length > 0 ? (
                                 <div className="overflow-x-auto">
-                                    <Table hoverable>
+                                    <Table hoverable className="text-sm [&_th]:py-3.5 [&_td]:py-3.5">
                                         <TableHead>
                                             <TableRow>
                                                 <TableHeadCell>Student Code</TableHeadCell>
@@ -105,7 +113,7 @@ export default function ShowClass({ auth, classroom }) {
                                         </TableHead>
                                         <TableBody className="divide-y">
                                             {classroom.students.map((student) => (
-                                                <TableRow key={student.id} className="bg-white">
+                                                <TableRow key={student.id} className="bg-background transition-colors hover:bg-muted/30">
                                                     <TableCell className="font-mono text-sm font-medium text-primary">{student.student_code}</TableCell>
                                                     <TableCell className="font-medium text-foreground">{student.first_name} {student.last_name}</TableCell>
                                                     <TableCell><StatusBadge status={student.status} /></TableCell>

@@ -59,7 +59,12 @@ export default function ShowSubject({ auth, subject }) {
                 )}
             </div>
 
-            <div className="mb-6">
+            <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+                <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Subject Details</p>
+                    <h1 className="mt-1 text-xl font-semibold text-foreground">{subject.name}</h1>
+                    <p className="text-sm text-muted-foreground">Code: {subject.subject_code}</p>
+                </div>
                 <Badge
                     variant="outline"
                     className={subject.is_active

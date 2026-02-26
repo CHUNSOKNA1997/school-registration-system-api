@@ -57,8 +57,8 @@ export default function TeachersIndex({ auth, teachers }) {
                 </Button>
             </PageHeader>
 
-            <Card>
-                <CardHeader className="border-b px-6">
+            <Card className="gap-0 py-0">
+                <CardHeader className="border-b px-6 py-4">
                     <div className="flex items-center gap-2">
                         <CardTitle className="text-base font-semibold">All Teachers</CardTitle>
                         <Badge variant="secondary">{teachers?.data?.length ?? 0}</Badge>
@@ -69,7 +69,7 @@ export default function TeachersIndex({ auth, teachers }) {
                         <>
                             <div className="overflow-x-auto">
                                 <TooltipProvider>
-                                    <Table striped hoverable className="text-sm">
+                                    <Table striped hoverable className="text-sm [&_th]:py-3.5 [&_td]:py-3.5">
                                         <TableHead>
                                             <TableRow>
                                                 <TableHeadCell className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">Code</TableHeadCell>
@@ -83,7 +83,7 @@ export default function TeachersIndex({ auth, teachers }) {
                                         </TableHead>
                                         <TableBody className="divide-y">
                                             {teachers.data.map((teacher) => (
-                                                <TableRow key={teacher.id} className="border-border bg-background">
+                                                <TableRow key={teacher.id} className="border-border bg-background transition-colors hover:bg-muted/30">
                                                     <TableCell className="font-mono text-sm font-medium text-primary">{teacher.teacher_code}</TableCell>
                                                     <TableCell>
                                                         <p className="font-medium text-foreground">{teacher.first_name} {teacher.last_name}</p>

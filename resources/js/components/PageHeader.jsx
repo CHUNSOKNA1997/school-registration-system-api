@@ -1,6 +1,8 @@
-export default function PageHeader({ icon: Icon, title, description, children }) {
+import { cn } from '@/lib/utils';
+
+export default function PageHeader({ icon: Icon, title, description, children, className }) {
     return (
-        <div className="flex items-center justify-between mb-6">
+        <div className={cn("mb-6 flex items-center justify-between", className)}>
             <div className="flex items-center gap-4">
                 {Icon && (
                     <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">

@@ -66,8 +66,8 @@ function NavLink({ item, isActive }) {
                 isActive={isActive}
                 className={cn(
                     "h-10 rounded-xl px-3 text-sm font-medium transition-all duration-150",
-                    "text-sidebar-foreground/80 hover:bg-white/10 hover:text-sidebar-foreground",
-                    "data-[active=true]:bg-white/20 data-[active=true]:text-sidebar-foreground data-[active=true]:shadow-none"
+                    "text-sidebar-foreground/75 hover:bg-white/[0.08] hover:text-sidebar-foreground",
+                    "data-[active=true]:bg-white/[0.14] data-[active=true]:text-sidebar-foreground data-[active=true]:shadow-none"
                 )}
             >
                 <Link href={item.href}>
@@ -108,7 +108,7 @@ export default function AuthenticatedLayout({ children }) {
                 <Sidebar className="shadow-lg" variant="sidebar">
                     <SidebarHeader className="border-b border-sidebar-border px-5 py-0">
                         <div className="flex h-16 items-center gap-3">
-                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15 backdrop-blur-sm">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/12 backdrop-blur-sm">
                                 <School className="h-5 w-5 text-white" />
                             </div>
                             <div>
@@ -152,7 +152,7 @@ export default function AuthenticatedLayout({ children }) {
 
                     <SidebarFooter className="border-t border-sidebar-border p-3">
                         <div className="mb-2 flex items-center gap-3 rounded-lg px-3 py-2.5">
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20 text-xs font-bold text-white">
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/15 text-xs font-bold text-white">
                                 {initials}
                             </div>
                             <div className="min-w-0 flex-1">
@@ -169,7 +169,7 @@ export default function AuthenticatedLayout({ children }) {
                             <SidebarMenuItem>
                                 <SidebarMenuButton
                                     onClick={() => setShowLogoutDialog(true)}
-                                    className="h-9 justify-start text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                                    className="h-9 justify-start text-sidebar-foreground/70 hover:bg-white/[0.08] hover:text-sidebar-foreground"
                                 >
                                     <LogOut className="h-4 w-4" />
                                     <span>Logout</span>
