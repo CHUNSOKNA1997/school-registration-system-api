@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\StudentResource;
 use App\Models\Classroom;
 use App\Models\Student;
 use App\Models\Subject;
@@ -117,7 +118,7 @@ class StudentController extends Controller
         ])->findOrFail($id);
 
         return Inertia::render('Students/Show', [
-            'student' => $student,
+            'student' => StudentResource::make($student)->resolve(),
         ]);
     }
 

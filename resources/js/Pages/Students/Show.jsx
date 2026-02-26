@@ -8,8 +8,7 @@ import {
     TableHeadCell, TableRow,
 } from 'flowbite-react';
 import { toast } from 'sonner';
-import { Users, ArrowLeft, Pencil, Trash2, BookOpen } from 'lucide-react';
-import PageHeader from '@/components/PageHeader';
+import { ArrowLeft, Pencil, Trash2, BookOpen } from 'lucide-react';
 import StatusBadge from '@/components/StatusBadge';
 import ConfirmDialog from '@/components/ConfirmDialog';
 
@@ -39,23 +38,19 @@ export default function ShowStudent({ auth, student }) {
         <AuthenticatedLayout>
             <Head title={`${student.first_name} ${student.last_name}`} />
 
-            <PageHeader
-                icon={Users}
-                title={`${student.first_name} ${student.last_name}`}
-                description={`Student Code: ${student.student_code}`}
-            >
-                <Button variant="outline" onClick={() => router.get('/students')}>
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+                <Button variant="outline" className="rounded-xl" onClick={() => router.get('/students')}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back
                 </Button>
                 <Link href={`/students/${student.id}/enrollments`}>
-                    <Button variant="outline">
+                    <Button variant="outline" className="rounded-xl">
                         <BookOpen className="mr-2 h-4 w-4" />
                         Enrollments
                     </Button>
                 </Link>
                 <Link href={`/students/${student.id}/edit`}>
-                    <Button>
+                    <Button className="rounded-xl">
                         <Pencil className="mr-2 h-4 w-4" />
                         Edit
                     </Button>
@@ -63,17 +58,16 @@ export default function ShowStudent({ auth, student }) {
                 {auth.user?.is_admin && (
                     <Button
                         variant="outline"
-                        className="text-destructive border-destructive/30 hover:bg-destructive/5"
+                        className="rounded-xl text-destructive border-destructive/30 hover:bg-destructive/5"
                         onClick={() => setDeleteDialog(true)}
                     >
                         <Trash2 className="mr-2 h-4 w-4" />
                         Delete
                     </Button>
                 )}
-            </PageHeader>
+            </div>
 
-            {/* Status badge inline below header */}
-            <div className="mb-6 -mt-2">
+            <div className="mb-6">
                 <StatusBadge status={student.status} />
             </div>
 

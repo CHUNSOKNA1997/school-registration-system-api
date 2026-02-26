@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use App\Enums\Shift;
 
@@ -49,7 +50,7 @@ class Classroom extends Model
                 $class->uuid = (string) Str::uuid();
             }
 
-            if (empty($class->class_code)) {
+            if (Schema::hasColumn($class->getTable(), 'class_code') && empty($class->class_code)) {
                 $class->class_code = self::generateClassCode();
             }
         });
