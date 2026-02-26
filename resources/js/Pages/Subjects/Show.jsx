@@ -25,7 +25,7 @@ export default function ShowSubject({ auth, subject }) {
 
     const handleDelete = () => {
         setDeleting(true);
-        router.delete(`/subjects/${subject.id}`, {
+        router.delete(`/subjects/${subject.uuid}`, {
             onSuccess: () => toast.success('Subject deleted successfully'),
             onError: () => toast.error('Failed to delete subject'),
             onFinish: () => setDeleting(false),
@@ -43,7 +43,7 @@ export default function ShowSubject({ auth, subject }) {
                 </Button>
                 {auth.user?.is_admin && (
                     <>
-                        <Button className="rounded-xl" onClick={() => router.get(`/subjects/${subject.id}/edit`)}>
+                        <Button className="rounded-xl" onClick={() => router.get(`/subjects/${subject.uuid}/edit`)}>
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit
                         </Button>

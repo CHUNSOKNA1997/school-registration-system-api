@@ -13,6 +13,11 @@ class Classroom extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
+    }
+
     protected $table = 'classes';
 
     protected $fillable = [

@@ -58,29 +58,27 @@ class ClassroomController extends Controller
         }
     }
 
-    public function show($id)
+    public function show(Classroom $classroom)
     {
-        $classroom = Classroom::with(['students' => function ($query) {
+        $classroom->load(['students' => function ($query) {
             $query->select('id', 'class_id', 'student_code', 'first_name', 'last_name', 'status');
-        }])->withCount('students')->findOrFail($id);
+        }]);
+        $classroom->loadCount('students');
 
         return Inertia::render('Classes/Show', [
             'classroom' => $classroom,
         ]);
     }
 
-    public function edit($id)
+    public function edit(Classroom $classroom)
     {
-        $classroom = Classroom::findOrFail($id);
-
         return Inertia::render('Classes/Edit', [
             'classroom' => $classroom,
         ]);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Classroom $classroom)
     {
-        $classroom = Classroom::findOrFail($id);
         $validated = $this->validateData($request, $classroom->id);
 
         DB::beginTransaction();
@@ -89,7 +87,7 @@ class ClassroomController extends Controller
             $classroom->update($validated);
             DB::commit();
 
-            return redirect()->route('classes.show', $classroom->id)
+            return redirect()->route('classes.show', $classroom->uuid)
                 ->with('success', 'Class updated successfully');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -97,10 +95,8 @@ class ClassroomController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy(Classroom $classroom)
     {
-        $classroom = Classroom::findOrFail($id);
-
         DB::beginTransaction();
 
         try {

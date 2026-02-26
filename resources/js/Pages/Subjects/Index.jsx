@@ -32,7 +32,7 @@ export default function SubjectsIndex({ auth, subjects }) {
     const handleDelete = () => {
         if (!deleteDialog.subject) return;
         setDeleting(true);
-        router.delete(`/subjects/${deleteDialog.subject.id}`, {
+        router.delete(`/subjects/${deleteDialog.subject.uuid}`, {
             onSuccess: () => {
                 toast.success('Subject deleted successfully');
                 closeDelete();
@@ -58,12 +58,10 @@ export default function SubjectsIndex({ auth, subjects }) {
             </PageHeader>
 
             <Card className="gap-0 py-0">
-                <CardHeader className="border-b px-6 py-4">
-                    <div className="flex items-center gap-2">
-                        <CardTitle className="text-base font-semibold">All Subjects</CardTitle>
-                        <Badge variant="secondary">{subjects?.data?.length ?? 0}</Badge>
-                    </div>
-                </CardHeader>
+                <div className="flex items-center gap-2 border-b px-6 py-3">
+                    <CardTitle className="text-base font-semibold">All Subjects</CardTitle>
+                    <Badge variant="secondary">{subjects?.data?.length ?? 0}</Badge>
+                </div>
                 <CardContent className="p-0">
                     {subjects?.data?.length > 0 ? (
                         <>
@@ -112,7 +110,7 @@ export default function SubjectsIndex({ auth, subjects }) {
                                                                         variant="ghost"
                                                                         size="sm"
                                                                         className="text-muted-foreground hover:bg-transparent hover:text-foreground"
-                                                                        onClick={() => router.get(`/subjects/${subject.id}`)}
+                                                                        onClick={() => router.get(`/subjects/${subject.uuid}`)}
                                                                     >
                                                                         <Eye className="h-4 w-4" />
                                                                     </Button>
@@ -128,7 +126,7 @@ export default function SubjectsIndex({ auth, subjects }) {
                                                                                 variant="ghost"
                                                                                 size="sm"
                                                                                 className="text-muted-foreground hover:bg-transparent hover:text-foreground"
-                                                                                onClick={() => router.get(`/subjects/${subject.id}/edit`)}
+                                                                                onClick={() => router.get(`/subjects/${subject.uuid}/edit`)}
                                                                             >
                                                                                 <Pencil className="h-4 w-4" />
                                                                             </Button>

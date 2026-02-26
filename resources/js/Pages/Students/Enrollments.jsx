@@ -43,7 +43,7 @@ export default function StudentEnrollments({ auth, student, enrollments, subject
 
     const handleAddEnrollment = (e) => {
         e.preventDefault();
-        post(`/students/${student.id}/enrollments`, {
+        post(`/students/${student.uuid}/enrollments`, {
             onSuccess: () => {
                 toast.success('Enrollment added successfully');
                 setAddDialog(false);
@@ -59,7 +59,7 @@ export default function StudentEnrollments({ auth, student, enrollments, subject
         e.preventDefault();
         if (!editDialog.enrollment) return;
 
-        put(`/students/${student.id}/enrollments/${editDialog.enrollment.id}`, {
+        put(`/students/${student.uuid}/enrollments/${editDialog.enrollment.id}`, {
             onSuccess: () => {
                 toast.success('Enrollment updated successfully');
                 setEditDialog({ open: false, enrollment: null });
@@ -73,7 +73,7 @@ export default function StudentEnrollments({ auth, student, enrollments, subject
     const handleDeleteEnrollment = () => {
         if (!deleteDialog.enrollment) return;
 
-        router.delete(`/students/${student.id}/enrollments/${deleteDialog.enrollment.id}`, {
+        router.delete(`/students/${student.uuid}/enrollments/${deleteDialog.enrollment.id}`, {
             onSuccess: () => {
                 toast.success('Enrollment removed successfully');
                 setDeleteDialog({ open: false, enrollment: null });
@@ -153,12 +153,12 @@ export default function StudentEnrollments({ auth, student, enrollments, subject
                             </svg>
                             Add Enrollment
                         </Button>
-                        <Link href={`/students/${student.id}/transcript`}>
+                        <Link href={`/students/${student.uuid}/transcript`}>
                             <Button variant="outline" className="bg-white/5 border-white/10 text-white">
                                 View Transcript
                             </Button>
                         </Link>
-                        <Link href={`/students/${student.id}`}>
+                        <Link href={`/students/${student.uuid}`}>
                             <Button variant="ghost" className="text-white/60 hover:text-white">
                                 Back to Student
                             </Button>

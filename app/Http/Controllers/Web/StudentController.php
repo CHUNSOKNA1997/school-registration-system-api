@@ -108,14 +108,9 @@ class StudentController extends Controller
     /**
      * Display the specified student
      */
-    public function show($id)
+    public function show(Student $student)
     {
-        $student = Student::with([
-            'class',
-            'enrollments.subject',
-            'enrollments.teacher',
-            'payments',
-        ])->findOrFail($id);
+        $student->load(['class', 'enrollments.subject', 'enrollments.teacher', 'payments']);
 
         return Inertia::render('Students/Show', [
             'student' => StudentResource::make($student)->resolve(),
@@ -125,10 +120,8 @@ class StudentController extends Controller
     /**
      * Show the form for editing the specified student
      */
-    public function edit($id)
+    public function edit(Student $student)
     {
-        $student = Student::findOrFail($id);
-        
         $classrooms = Classroom::select('id', 'name_en', 'name_kh', 'grade_level')
             ->orderBy('grade_level')
             ->get();
@@ -142,10 +135,8 @@ class StudentController extends Controller
     /**
      * Update the specified student
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Student $student)
     {
-        $student = Student::findOrFail($id);
-
         $validated = $request->validate([
             'first_name' => ['required', 'string', 'max:100'],
             'last_name' => ['required', 'string', 'max:100'],
@@ -181,7 +172,7 @@ class StudentController extends Controller
 
             DB::commit();
 
-            return redirect()->route('students.show', $student->id)
+            return redirect()->route('students.show', $student->uuid)
                 ->with('success', 'Student updated successfully');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -192,10 +183,8 @@ class StudentController extends Controller
     /**
      * Remove the specified student
      */
-    public function destroy($id)
+    public function destroy(Student $student)
     {
-        $student = Student::findOrFail($id);
-
         DB::beginTransaction();
 
         try {
@@ -214,10 +203,10 @@ class StudentController extends Controller
     /**
      * Show student enrollments
      */
-    public function enrollments($id)
+    public function enrollments(Student $student)
     {
-        $student = Student::with(['class'])->findOrFail($id);
-        
+        $student->load(['class']);
+
         $enrollments = $student->enrollments()
             ->with(['subject', 'teacher'])
             ->get();

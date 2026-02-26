@@ -51,7 +51,7 @@ export default function EditStudent({ student, classrooms }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        put(`/students/${student.id}`, {
+        put(`/students/${student.uuid}`, {
             onSuccess: () => toast.success('Student updated successfully'),
             onError: () => toast.error('Please fix the errors below'),
         });
@@ -63,16 +63,12 @@ export default function EditStudent({ student, classrooms }) {
         <AuthenticatedLayout>
             <Head title={`Edit – ${student.first_name} ${student.last_name}`} />
 
-            <PageHeader
-                icon={Users}
-                title={`Edit Student`}
-                description={`${student.first_name} ${student.last_name} · ${student.student_code}`}
-            >
-                <Button variant="outline" onClick={() => router.get(`/students/${student.id}`)}>
+            <div className="mb-4">
+                <Button variant="ghost" onClick={() => router.get('/students')}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back
                 </Button>
-            </PageHeader>
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Personal Information */}
@@ -219,7 +215,7 @@ export default function EditStudent({ student, classrooms }) {
 
                 {/* Actions */}
                 <div className="flex items-center justify-end gap-3">
-                    <Button type="button" variant="outline" onClick={() => router.get(`/students/${student.id}`)}>
+                    <Button type="button" variant="outline" onClick={() => router.get(`/students/${student.uuid}`)}>
                         Cancel
                     </Button>
                     <Button type="submit" disabled={processing}>

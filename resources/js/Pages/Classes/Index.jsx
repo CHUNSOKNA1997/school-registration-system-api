@@ -30,7 +30,7 @@ export default function ClassesIndex({ auth, classrooms }) {
     const handleDelete = () => {
         if (!deleteDialog.classroom) return;
         setDeleting(true);
-        router.delete(`/classes/${deleteDialog.classroom.id}`, {
+        router.delete(`/classes/${deleteDialog.classroom.uuid}`, {
             onSuccess: () => {
                 toast.success('Class deleted successfully');
                 closeDelete();
@@ -57,12 +57,10 @@ export default function ClassesIndex({ auth, classrooms }) {
             </PageHeader>
 
             <Card className="gap-0 py-0">
-                <CardHeader className="border-b px-6 py-4">
-                    <div className="flex items-center gap-2">
-                        <CardTitle className="text-base font-semibold">All Classes</CardTitle>
-                        <Badge variant="secondary">{classrooms?.data?.length ?? 0}</Badge>
-                    </div>
-                </CardHeader>
+                <div className="flex items-center gap-2 border-b px-6 py-3">
+                    <CardTitle className="text-base font-semibold">All Classes</CardTitle>
+                    <Badge variant="secondary">{classrooms?.data?.length ?? 0}</Badge>
+                </div>
                 <CardContent className="p-0">
                     {classrooms?.data?.length > 0 ? (
                         <>
@@ -108,7 +106,7 @@ export default function ClassesIndex({ auth, classrooms }) {
                                                                         variant="ghost"
                                                                         size="sm"
                                                                         className="text-muted-foreground hover:bg-transparent hover:text-foreground"
-                                                                        onClick={() => router.get(`/classes/${classroom.id}`)}
+                                                                        onClick={() => router.get(`/classes/${classroom.uuid}`)}
                                                                     >
                                                                         <Eye className="h-4 w-4" />
                                                                     </Button>
@@ -124,7 +122,7 @@ export default function ClassesIndex({ auth, classrooms }) {
                                                                                 variant="ghost"
                                                                                 size="sm"
                                                                                 className="text-muted-foreground hover:bg-transparent hover:text-foreground"
-                                                                                onClick={() => router.get(`/classes/${classroom.id}/edit`)}
+                                                                                onClick={() => router.get(`/classes/${classroom.uuid}/edit`)}
                                                                             >
                                                                                 <Pencil className="h-4 w-4" />
                                                                             </Button>

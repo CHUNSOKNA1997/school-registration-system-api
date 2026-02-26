@@ -34,7 +34,7 @@ export default function EditClass({ classroom }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        put(`/classes/${classroom.id}`, {
+        put(`/classes/${classroom.uuid}`, {
             onSuccess: () => toast.success('Class updated successfully'),
             onError: () => toast.error('Please fix the errors below'),
         });
@@ -46,12 +46,12 @@ export default function EditClass({ classroom }) {
         <AuthenticatedLayout>
             <Head title={`Edit – ${classroom.name}`} />
 
-            <PageHeader icon={School} title="Edit Class" description={`${classroom.name} · ${classroom.academic_year}`}>
-                <Button variant="outline" onClick={() => router.get(`/classes/${classroom.id}`)}>
+            <div className="mb-4">
+                <Button variant="ghost" onClick={() => router.get('/classes')}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back
                 </Button>
-            </PageHeader>
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <Card>

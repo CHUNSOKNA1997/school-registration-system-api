@@ -31,7 +31,7 @@ export default function StudentsIndex({ auth, students }) {
     const handleDelete = () => {
         if (!deleteDialog.student) return;
         setDeleting(true);
-        router.delete(`/students/${deleteDialog.student.id}`, {
+        router.delete(`/students/${deleteDialog.student.uuid}`, {
             onSuccess: () => {
                 toast.success('Student deleted successfully');
                 closeDelete();
@@ -57,19 +57,17 @@ export default function StudentsIndex({ auth, students }) {
             </PageHeader>
 
             {/* Table */}
-            <Card className="py-3">
-                <CardHeader className="grid-rows-[auto] gap-0 border-b px-6 pt-3 pb-2 [.border-b]:pb-2">
-                    <div className="flex items-center gap-2">
-                        <CardTitle className="text-base font-semibold">All Students</CardTitle>
-                        <Badge variant="secondary">{students?.data?.length ?? 0}</Badge>
-                    </div>
-                </CardHeader>
+            <Card className="gap-0 py-0">
+                <div className="flex items-center gap-2 border-b px-6 py-3">
+                    <CardTitle className="text-base font-semibold">All Students</CardTitle>
+                    <Badge variant="secondary">{students?.data?.length ?? 0}</Badge>
+                </div>
                 <CardContent className="p-0">
                     {students?.data?.length > 0 ? (
                         <>
                             <div className="overflow-x-auto">
                                 <TooltipProvider>
-                                    <Table striped hoverable className="text-sm">
+                                    <Table hoverable className="text-sm">
                                         <TableHead>
                                             <TableRow>
                                                 <TableHeadCell className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">Student Code</TableHeadCell>
@@ -114,7 +112,7 @@ export default function StudentsIndex({ auth, students }) {
                                                                     <Button
                                                                         variant="ghost" size="sm"
                                                                         className="text-muted-foreground hover:bg-transparent hover:text-foreground"
-                                                                        onClick={() => router.get(`/students/${student.id}`)}
+                                                                        onClick={() => router.get(`/students/${student.uuid}`)}
                                                                     >
                                                                         <Eye className="h-4 w-4" />
                                                                     </Button>
@@ -127,7 +125,7 @@ export default function StudentsIndex({ auth, students }) {
                                                                     <Button
                                                                         variant="ghost" size="sm"
                                                                         className="text-muted-foreground hover:bg-transparent hover:text-foreground"
-                                                                        onClick={() => router.get(`/students/${student.id}/edit`)}
+                                                                        onClick={() => router.get(`/students/${student.uuid}/edit`)}
                                                                     >
                                                                         <Pencil className="h-4 w-4" />
                                                                     </Button>

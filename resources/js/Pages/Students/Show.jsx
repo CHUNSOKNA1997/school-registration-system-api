@@ -16,7 +16,7 @@ function InfoItem({ label, value, className = '' }) {
     return (
         <div>
             <p className="mb-0.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
-            <p className={`text-sm text-foreground ${className}`}>{value ?? '—'}</p>
+            <div className={`text-sm text-foreground ${className}`}>{value ?? '—'}</div>
         </div>
     );
 }
@@ -27,7 +27,7 @@ export default function ShowStudent({ auth, student }) {
 
     const handleDelete = () => {
         setDeleting(true);
-        router.delete(`/students/${student.id}`, {
+        router.delete(`/students/${student.uuid}`, {
             onSuccess: () => toast.success('Student deleted'),
             onError: () => toast.error('Failed to delete student'),
             onFinish: () => setDeleting(false),
@@ -37,46 +37,13 @@ export default function ShowStudent({ auth, student }) {
     return (
         <AuthenticatedLayout>
             <Head title={`${student.first_name} ${student.last_name}`} />
-
-            <div className="mb-4 flex flex-wrap items-center gap-2">
-                <Button variant="outline" className="rounded-xl" onClick={() => router.get('/students')}>
+            <div className="mb-4">
+                <Button variant="ghost" className="rounded-xl" onClick={() => router.get('/students')}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back
                 </Button>
-                <Link href={`/students/${student.id}/enrollments`}>
-                    <Button variant="outline" className="rounded-xl">
-                        <BookOpen className="mr-2 h-4 w-4" />
-                        Enrollments
-                    </Button>
-                </Link>
-                <Link href={`/students/${student.id}/edit`}>
-                    <Button className="rounded-xl">
-                        <Pencil className="mr-2 h-4 w-4" />
-                        Edit
-                    </Button>
-                </Link>
-                {auth.user?.is_admin && (
-                    <Button
-                        variant="outline"
-                        className="rounded-xl text-destructive border-destructive/30 hover:bg-destructive/5"
-                        onClick={() => setDeleteDialog(true)}
-                    >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
-                    </Button>
-                )}
             </div>
 
-            <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-                <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Student Profile</p>
-                    <h1 className="mt-1 text-xl font-semibold text-foreground">
-                        {student.first_name} {student.last_name}
-                    </h1>
-                    <p className="text-sm text-muted-foreground">Code: {student.student_code}</p>
-                </div>
-                <StatusBadge status={student.status} />
-            </div>
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 {/* Left (2/3) */}
@@ -89,6 +56,8 @@ export default function ShowStudent({ auth, student }) {
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="grid grid-cols-2 gap-5">
+                            <InfoItem label="Student Code" value={student.student_code} className="font-mono text-primary" />
+                            <InfoItem label="Status" value={<StatusBadge status={student.status} />} />
                             <InfoItem label="Full Name (EN)" value={`${student.first_name} ${student.last_name}`} />
                             <InfoItem label="Full Name (KH)" value={student.khmer_name} />
                             <InfoItem label="Date of Birth" value={student.date_of_birth} />
@@ -143,7 +112,7 @@ export default function ShowStudent({ auth, student }) {
                                 <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                                     Current Enrollments
                                 </CardTitle>
-                                <Link href={`/students/${student.id}/enrollments`}>
+                                <Link href={`/students/${student.uuid}/enrollments`}>
                                     <Button size="sm" variant="ghost" className="text-primary">View All</Button>
                                 </Link>
                             </CardHeader>

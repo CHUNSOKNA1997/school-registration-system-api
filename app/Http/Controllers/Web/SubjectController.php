@@ -54,27 +54,24 @@ class SubjectController extends Controller
         }
     }
 
-    public function show($id)
+    public function show(Subject $subject)
     {
-        $subject = Subject::withCount(['students', 'teachers'])->findOrFail($id);
+        $subject->loadCount(['students', 'teachers']);
 
         return Inertia::render('Subjects/Show', [
             'subject' => $subject,
         ]);
     }
 
-    public function edit($id)
+    public function edit(Subject $subject)
     {
-        $subject = Subject::findOrFail($id);
-
         return Inertia::render('Subjects/Edit', [
             'subject' => $subject,
         ]);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Subject $subject)
     {
-        $subject = Subject::findOrFail($id);
         $validated = $this->validateData($request);
 
         DB::beginTransaction();
@@ -83,7 +80,7 @@ class SubjectController extends Controller
             $subject->update($validated);
             DB::commit();
 
-            return redirect()->route('subjects.show', $subject->id)
+            return redirect()->route('subjects.show', $subject->uuid)
                 ->with('success', 'Subject updated successfully');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -91,10 +88,8 @@ class SubjectController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy(Subject $subject)
     {
-        $subject = Subject::findOrFail($id);
-
         DB::beginTransaction();
 
         try {

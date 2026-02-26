@@ -51,27 +51,24 @@ class TeacherController extends Controller
         }
     }
 
-    public function show($id)
+    public function show(Teacher $teacher)
     {
-        $teacher = Teacher::withCount(['subjects'])->findOrFail($id);
+        $teacher->loadCount(['subjects']);
 
         return Inertia::render('Teachers/Show', [
             'teacher' => TeacherResource::make($teacher)->resolve(),
         ]);
     }
 
-    public function edit($id)
+    public function edit(Teacher $teacher)
     {
-        $teacher = Teacher::findOrFail($id);
-
         return Inertia::render('Teachers/Edit', [
             'teacher' => $teacher,
         ]);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Teacher $teacher)
     {
-        $teacher = Teacher::findOrFail($id);
         $validated = $this->validateData($request, $teacher->id);
 
         DB::beginTransaction();
@@ -80,7 +77,7 @@ class TeacherController extends Controller
             $teacher->update($validated);
             DB::commit();
 
-            return redirect()->route('teachers.show', $teacher->id)
+            return redirect()->route('teachers.show', $teacher->uuid)
                 ->with('success', 'Teacher updated successfully');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -88,10 +85,8 @@ class TeacherController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy(Teacher $teacher)
     {
-        $teacher = Teacher::findOrFail($id);
-
         DB::beginTransaction();
 
         try {

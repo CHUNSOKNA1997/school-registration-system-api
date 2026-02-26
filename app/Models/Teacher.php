@@ -13,6 +13,11 @@ class Teacher extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
+    }
+
     protected $fillable = [
         'uuid',
         'teacher_code',

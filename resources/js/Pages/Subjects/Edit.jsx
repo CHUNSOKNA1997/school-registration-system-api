@@ -36,7 +36,7 @@ export default function EditSubject({ subject }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        put(`/subjects/${subject.id}`, {
+        put(`/subjects/${subject.uuid}`, {
             onSuccess: () => toast.success('Subject updated successfully'),
             onError: () => toast.error('Please fix the errors below'),
         });
@@ -48,12 +48,12 @@ export default function EditSubject({ subject }) {
         <AuthenticatedLayout>
             <Head title={`Edit – ${subject.name}`} />
 
-            <PageHeader icon={BookOpen} title="Edit Subject" description={`${subject.name} · ${subject.subject_code}`}>
-                <Button variant="outline" onClick={() => router.get(`/subjects/${subject.id}`)}>
+            <div className="mb-4">
+                <Button variant="ghost" onClick={() => router.get('/subjects')}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back
                 </Button>
-            </PageHeader>
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <Card>

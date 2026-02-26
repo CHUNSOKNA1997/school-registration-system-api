@@ -13,9 +13,8 @@ class StudentSubjectController extends Controller
     /**
      * Store a newly created enrollment
      */
-    public function store(Request $request, $studentId)
+    public function store(Request $request, Student $student)
     {
-        $student = Student::findOrFail($studentId);
 
         $validated = $request->validate([
             'subject_id' => ['required', 'exists:subjects,id'],

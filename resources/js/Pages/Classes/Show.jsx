@@ -28,7 +28,7 @@ export default function ShowClass({ auth, classroom }) {
 
     const handleDelete = () => {
         setDeleting(true);
-        router.delete(`/classes/${classroom.id}`, {
+        router.delete(`/classes/${classroom.uuid}`, {
             onSuccess: () => toast.success('Class deleted successfully'),
             onError: () => toast.error('Failed to delete class'),
             onFinish: () => setDeleting(false),
@@ -46,7 +46,7 @@ export default function ShowClass({ auth, classroom }) {
                 </Button>
                 {auth.user?.is_admin && (
                     <>
-                        <Button className="rounded-xl" onClick={() => router.get(`/classes/${classroom.id}/edit`)}>
+                        <Button className="rounded-xl" onClick={() => router.get(`/classes/${classroom.uuid}/edit`)}>
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit
                         </Button>
