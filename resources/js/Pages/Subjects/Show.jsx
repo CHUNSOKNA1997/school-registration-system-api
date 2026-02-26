@@ -1,11 +1,10 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { ArrowLeft, Pencil, Trash2 } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import ConfirmDialog from '@/components/ConfirmDialog';
 
 function InfoItem({ label, value, className = '' }) {
@@ -36,90 +35,58 @@ export default function ShowSubject({ auth, subject }) {
         <AuthenticatedLayout>
             <Head title={subject.name} />
 
-            <div className="mb-4 flex flex-wrap items-center gap-2">
-                <Button variant="outline" className="rounded-xl" onClick={() => router.get('/subjects')}>
+            <div className="mb-4">
+                <Button variant="ghost" onClick={() => router.get('/subjects')}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back
                 </Button>
-                {auth.user?.is_admin && (
-                    <>
-                        <Button className="rounded-xl" onClick={() => router.get(`/subjects/${subject.uuid}/edit`)}>
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Edit
-                        </Button>
-                        <Button
-                            variant="outline"
-                            className="rounded-xl text-destructive border-destructive/30 hover:bg-destructive/5"
-                            onClick={() => setDeleteDialog(true)}
-                        >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                        </Button>
-                    </>
-                )}
-            </div>
-
-            <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-                <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Subject Details</p>
-                    <h1 className="mt-1 text-xl font-semibold text-foreground">{subject.name}</h1>
-                    <p className="text-sm text-muted-foreground">Code: {subject.subject_code}</p>
-                </div>
-                <Badge
-                    variant="outline"
-                    className={subject.is_active
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                        : 'bg-slate-100 text-slate-600 border-slate-200'}
-                >
-                    {subject.is_active ? 'Active' : 'Inactive'}
-                </Badge>
             </div>
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 <div className="space-y-6 lg:col-span-2">
                     <Card>
-                        <CardHeader className="pb-3">
-                            <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Subject Details</CardTitle>
-                        </CardHeader>
-                        <CardContent className="grid grid-cols-2 gap-5">
-                            <InfoItem label="Name" value={subject.name} />
-                            <InfoItem label="Khmer Name" value={subject.name_khmer} />
-                            <InfoItem label="Grade Level" value={`Grade ${subject.grade_level}`} />
-                            <InfoItem label="Type" value={formatType(subject.subject_type)} />
-                            <InfoItem label="Credits" value={subject.credits} />
-                            <InfoItem label="Hours / Week" value={subject.hours_per_week} />
-                            <InfoItem label="Fee" value={`$${subject.fee ?? 0}`} />
-                            <InfoItem label="Monthly Fee" value={`$${subject.monthly_fee ?? 0}`} />
-                        </CardContent>
+                        <div>
+                            <div className="px-6 pt-6 pb-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">Subject Details</div>
+                            <div className="grid grid-cols-2 gap-5 px-6 pb-6">
+                                <InfoItem label="Name" value={subject.name} />
+                                <InfoItem label="Khmer Name" value={subject.name_khmer} />
+                                <InfoItem label="Grade Level" value={`Grade ${subject.grade_level}`} />
+                                <InfoItem label="Type" value={formatType(subject.subject_type)} />
+                                <InfoItem label="Credits" value={subject.credits} />
+                                <InfoItem label="Hours / Week" value={subject.hours_per_week} />
+                                <InfoItem label="Fee" value={`$${subject.fee ?? 0}`} />
+                                <InfoItem label="Monthly Fee" value={`$${subject.monthly_fee ?? 0}`} />
+                            </div>
+                        </div>
                     </Card>
 
                     {subject.description && (
                         <Card>
-                            <CardHeader className="pb-3">
-                                <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Description</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-sm text-muted-foreground leading-relaxed">{subject.description}</p>
-                            </CardContent>
+                            <div>
+                                <div className="px-6 pt-6 pb-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">Description</div>
+                                <div className="px-6 pb-6">
+                                    <p className="text-sm text-muted-foreground leading-relaxed">{subject.description}</p>
+                                </div>
+                            </div>
                         </Card>
                     )}
                 </div>
 
                 <div className="space-y-6">
                     <Card>
-                        <CardHeader className="pb-3">
-                            <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Quick Stats</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm text-muted-foreground">Assigned Teachers</span>
-                                <span className="text-lg font-semibold text-foreground">{subject.teachers_count ?? 0}</span>
+                        <div>
+                            <div className="px-6 pt-6 pb-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">Quick Stats</div>
+                            <div className="space-y-3 px-6 pb-6">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-muted-foreground">Assigned Teachers</span>
+                                    <span className="text-lg font-semibold text-foreground">{subject.teachers_count ?? 0}</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-muted-foreground">Enrolled Students</span>
+                                    <span className="text-lg font-semibold text-foreground">{subject.students_count ?? 0}</span>
+                                </div>
                             </div>
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm text-muted-foreground">Enrolled Students</span>
-                                <span className="text-lg font-semibold text-foreground">{subject.students_count ?? 0}</span>
-                            </div>
-                        </CardContent>
+                        </div>
                     </Card>
                 </div>
             </div>

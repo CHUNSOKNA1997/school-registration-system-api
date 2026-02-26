@@ -50,59 +50,53 @@ export default function ShowStudent({ auth, student }) {
                 <div className="space-y-6 lg:col-span-2">
                     {/* Personal */}
                     <Card>
-                        <CardHeader className="pb-3">
-                            <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                                Personal Information
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="grid grid-cols-2 gap-5">
-                            <InfoItem label="Student Code" value={student.student_code} className="font-mono text-primary" />
-                            <InfoItem label="Status" value={<StatusBadge status={student.status} />} />
-                            <InfoItem label="Full Name (EN)" value={`${student.first_name} ${student.last_name}`} />
-                            <InfoItem label="Full Name (KH)" value={student.khmer_name} />
-                            <InfoItem label="Date of Birth" value={student.date_of_birth} />
-                            <InfoItem label="Place of Birth" value={student.place_of_birth} />
-                            <InfoItem label="Gender" value={student.gender} className="capitalize" />
-                            <InfoItem label="Nationality" value={student.nationality} />
-                            <InfoItem label="Student Type" value={student.student_type} className="capitalize" />
-                        </CardContent>
+                        <div>
+                            <div className="px-6 pt-6 pb-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">Personal Information</div>
+                            <div className="grid grid-cols-2 gap-5 px-6 pb-6">
+                                <InfoItem label="Student Code" value={student.student_code} className="font-mono text-primary" />
+                                <InfoItem label="Status" value={<StatusBadge status={student.status} />} />
+                                <InfoItem label="Full Name (EN)" value={`${student.first_name} ${student.last_name}`} />
+                                <InfoItem label="Full Name (KH)" value={student.khmer_name} />
+                                <InfoItem label="Date of Birth" value={student.date_of_birth} />
+                                <InfoItem label="Place of Birth" value={student.place_of_birth} />
+                                <InfoItem label="Gender" value={student.gender} className="capitalize" />
+                                <InfoItem label="Nationality" value={student.nationality} />
+                                <InfoItem label="Student Type" value={student.student_type} className="capitalize" />
+                            </div>
+                        </div>
                     </Card>
 
                     {/* Contact */}
                     <Card>
-                        <CardHeader className="pb-3">
-                            <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                                Contact Information
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="grid grid-cols-2 gap-5">
-                            <InfoItem label="Phone" value={student.phone} />
-                            <InfoItem label="Email" value={student.email} />
-                            <div className="col-span-2">
-                                <InfoItem label="Current Address" value={student.current_address} />
+                        <div>
+                            <div className="px-6 pt-6 pb-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">Contact Information</div>
+                            <div className="grid grid-cols-2 gap-5 px-6 pb-6">
+                                <InfoItem label="Phone" value={student.phone} />
+                                <InfoItem label="Email" value={student.email} />
+                                <div className="col-span-2">
+                                    <InfoItem label="Current Address" value={student.current_address} />
+                                </div>
+                                <div className="col-span-2">
+                                    <InfoItem label="Permanent Address" value={student.permanent_address} />
+                                </div>
                             </div>
-                            <div className="col-span-2">
-                                <InfoItem label="Permanent Address" value={student.permanent_address} />
-                            </div>
-                        </CardContent>
+                        </div>
                     </Card>
 
                     {/* Parent */}
                     <Card>
-                        <CardHeader className="pb-3">
-                            <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                                Parent / Guardian
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="grid grid-cols-2 gap-5">
-                            <InfoItem label="Parent Name" value={student.parent_name} />
-                            <InfoItem label="Parent Phone" value={student.parent_phone} />
-                            <InfoItem label="Parent Occupation" value={student.parent_occupation} />
-                            <InfoItem label="Emergency Contact" value={student.emergency_contact} />
-                            <div className="col-span-2">
-                                <InfoItem label="Emergency Contact Relationship" value={student.emergency_contact_relationship} />
+                        <div>
+                            <div className="px-6 pt-6 pb-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">Parent / Guardian</div>
+                            <div className="grid grid-cols-2 gap-5 px-6 pb-6">
+                                <InfoItem label="Parent Name" value={student.parent_name} />
+                                <InfoItem label="Parent Phone" value={student.parent_phone} />
+                                <InfoItem label="Parent Occupation" value={student.parent_occupation} />
+                                <InfoItem label="Emergency Contact" value={student.emergency_contact} />
+                                <div className="col-span-2">
+                                    <InfoItem label="Emergency Contact Relationship" value={student.emergency_contact_relationship} />
+                                </div>
                             </div>
-                        </CardContent>
+                        </div>
                     </Card>
 
                     {/* Enrollments */}
