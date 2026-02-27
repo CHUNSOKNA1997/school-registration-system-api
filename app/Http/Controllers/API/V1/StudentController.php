@@ -11,6 +11,7 @@ use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\Response;
 
 class StudentController extends Controller
@@ -81,8 +82,8 @@ class StudentController extends Controller
             'gender' => ['required', 'string', 'in:male,female,other'],
             'student_type' => ['required', 'string', 'in:regular,monk'],
             'nationality' => ['nullable', 'string', 'max:50'],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'email' => ['nullable', 'email'],
+            'phone' => ['nullable', 'string', 'max:20', Rule::unique('students', 'phone')->whereNull('deleted_at')],
+            'email' => ['nullable', 'email', Rule::unique('students', 'email')->whereNull('deleted_at')],
             'current_address' => ['nullable', 'string'],
             'permanent_address' => ['nullable', 'string'],
             'parent_name' => ['required', 'string'],
@@ -106,6 +107,13 @@ class StudentController extends Controller
             if ($class->current_enrollment >= $class->capacity) {
                 return response()->jsonError('Selected class is at full capacity', 422);
             }
+        }
+
+        if ($this->hasDuplicateIdentity($validated)) {
+            return response()->jsonError(
+                'Student is already registered with the same name, date of birth, and parent phone',
+                422
+            );
         }
 
         DB::beginTransaction();
@@ -174,8 +182,19 @@ class StudentController extends Controller
             'gender' => ['sometimes', 'string', 'in:male,female,other'],
             'student_type' => ['sometimes', 'string', 'in:regular,monk'],
             'nationality' => ['nullable', 'string', 'max:50'],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'email' => ['nullable', 'email'],
+            'phone' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:20',
+                Rule::unique('students', 'phone')->ignore($student->id)->whereNull('deleted_at'),
+            ],
+            'email' => [
+                'sometimes',
+                'nullable',
+                'email',
+                Rule::unique('students', 'email')->ignore($student->id)->whereNull('deleted_at'),
+            ],
             'current_address' => ['nullable', 'string'],
             'permanent_address' => ['nullable', 'string'],
             'parent_name' => ['sometimes', 'string'],
@@ -196,6 +215,21 @@ class StudentController extends Controller
         DB::beginTransaction();
 
         try {
+            $identityPayload = [
+                'first_name' => $validated['first_name'] ?? $student->first_name,
+                'last_name' => $validated['last_name'] ?? $student->last_name,
+                'date_of_birth' => $validated['date_of_birth'] ?? $student->date_of_birth?->format('Y-m-d'),
+                'parent_phone' => $validated['parent_phone'] ?? $student->parent_phone,
+            ];
+
+            if ($this->hasDuplicateIdentity($identityPayload, $student->id)) {
+                DB::rollBack();
+                return response()->jsonError(
+                    'Student is already registered with the same name, date of birth, and parent phone',
+                    422
+                );
+            }
+
             $validated['updated_by'] = $request->user()->id;
             $student->update($validated);
 
@@ -297,5 +331,21 @@ class StudentController extends Controller
         $response->headers->set('Link', sprintf('<%s>; rel="successor-version"', $replacementPath));
 
         return $response;
+    }
+
+    private function hasDuplicateIdentity(array $payload, ?int $ignoreStudentId = null): bool
+    {
+        $query = Student::query()
+            ->where('first_name', $payload['first_name'])
+            ->where('last_name', $payload['last_name'])
+            ->whereDate('date_of_birth', $payload['date_of_birth'])
+            ->where('parent_phone', $payload['parent_phone'])
+            ->whereNull('deleted_at');
+
+        if ($ignoreStudentId !== null) {
+            $query->where('id', '!=', $ignoreStudentId);
+        }
+
+        return $query->exists();
     }
 }
