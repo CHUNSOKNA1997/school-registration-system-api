@@ -8,13 +8,34 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
 {
+    private const CANONICAL_REGISTRATIONS_PATH = '/api/v1/registrations';
+    private const CANONICAL_SESSIONS_PATH = '/api/v1/sessions';
+    private const CANONICAL_CURRENT_SESSION_PATH = '/api/v1/sessions/current';
+    private const SUNSET_AT = '2026-06-30 23:59:59 UTC';
+
     /**
-     * Register a new user (Admin only)
+     * Deprecated endpoint. Use POST /api/v1/registrations.
      */
-    public function register(Request $request)
+    public function register(Request $request): Response
+    {
+        $response = $this->handleRegister($request);
+
+        return $this->withDeprecationHeaders($response, self::CANONICAL_REGISTRATIONS_PATH);
+    }
+
+    /**
+     * Canonical endpoint for registration.
+     */
+    public function createRegistration(Request $request): Response
+    {
+        return $this->handleRegister($request);
+    }
+
+    private function handleRegister(Request $request): Response
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -42,9 +63,24 @@ class AuthController extends Controller
     }
 
     /**
-     * Login user
+     * Deprecated endpoint. Use POST /api/v1/sessions.
      */
-    public function login(Request $request)
+    public function login(Request $request): Response
+    {
+        $response = $this->handleLogin($request);
+
+        return $this->withDeprecationHeaders($response, self::CANONICAL_SESSIONS_PATH);
+    }
+
+    /**
+     * Canonical endpoint for session creation (login).
+     */
+    public function createSession(Request $request): Response
+    {
+        return $this->handleLogin($request);
+    }
+
+    private function handleLogin(Request $request): Response
     {
         $request->validate([
             'email' => ['required', 'email'],
@@ -78,9 +114,24 @@ class AuthController extends Controller
     }
 
     /**
-     * Logout user
+     * Deprecated endpoint. Use DELETE /api/v1/sessions/current.
      */
-    public function logout(Request $request)
+    public function logout(Request $request): Response
+    {
+        $response = $this->handleLogout($request);
+
+        return $this->withDeprecationHeaders($response, self::CANONICAL_CURRENT_SESSION_PATH);
+    }
+
+    /**
+     * Canonical endpoint for session revoke (logout).
+     */
+    public function destroyCurrentSession(Request $request): Response
+    {
+        return $this->handleLogout($request);
+    }
+
+    private function handleLogout(Request $request): Response
     {
         /** @var \Laravel\Sanctum\PersonalAccessToken $token */
         $token = $request->user()->currentAccessToken();
@@ -90,9 +141,24 @@ class AuthController extends Controller
     }
 
     /**
-     * Get authenticated user
+     * Deprecated endpoint. Use GET /api/v1/sessions/current.
      */
-    public function user(Request $request)
+    public function user(Request $request): Response
+    {
+        $response = $this->handleSessionUser($request);
+
+        return $this->withDeprecationHeaders($response, self::CANONICAL_CURRENT_SESSION_PATH);
+    }
+
+    /**
+     * Canonical endpoint for current authenticated session user.
+     */
+    public function showCurrentSession(Request $request): Response
+    {
+        return $this->handleSessionUser($request);
+    }
+
+    private function handleSessionUser(Request $request): Response
     {
         return response()->jsonSuccess(UserResource::make($request->user()));
     }
@@ -115,5 +181,16 @@ class AuthController extends Controller
         return response()->jsonSuccess([
             'token' => $token,
         ], 200, 'Token refreshed successfully');
+    }
+
+    private function withDeprecationHeaders(Response $response, string $replacementPath): Response
+    {
+        $sunset = gmdate('D, d M Y H:i:s \G\M\T', strtotime(self::SUNSET_AT));
+
+        $response->headers->set('Deprecation', 'true');
+        $response->headers->set('Sunset', $sunset);
+        $response->headers->set('Link', sprintf('<%s>; rel="successor-version"', $replacementPath));
+
+        return $response;
     }
 }

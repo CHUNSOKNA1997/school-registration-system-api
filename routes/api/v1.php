@@ -12,12 +12,21 @@ use App\Http\Controllers\API\V1\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'v1', 'as' => 'v1.'], function () {
+    // Canonical auth/session routes
+    Route::post('registrations', [AuthController::class, 'createRegistration']);
+    Route::post('sessions', [AuthController::class, 'createSession']);
+    Route::middleware(['auth:sanctum'])->group(function () {
+        Route::get('sessions/current', [AuthController::class, 'showCurrentSession']);
+        Route::delete('sessions/current', [AuthController::class, 'destroyCurrentSession']);
+    });
+
+    // Deprecated auth routes (kept non-breaking)
     Route::group(['prefix' => 'auth', 'as' => 'auth.'], function () {
-        // Public routes
+        // Public routes (deprecated aliases)
         Route::post('register', [AuthController::class, 'register']);
         Route::post('login', [AuthController::class, 'login']);
 
-        // Protected routes
+        // Protected routes (deprecated aliases)
         Route::middleware(['auth:sanctum'])->group(function () {
             Route::delete('logout', [AuthController::class, 'logout']);
             Route::get('user', [AuthController::class, 'user']);
@@ -57,18 +66,24 @@ Route::group(['prefix' => 'v1', 'as' => 'v1.'], function () {
         Route::prefix('students/{student}')->group(function () {
             Route::get('enrollments', [StudentSubjectController::class, 'index']);
             Route::post('enrollments', [StudentSubjectController::class, 'store']);
+            Route::patch('enrollments/{enrollment}', [StudentSubjectController::class, 'updatePartial']);
+            // Deprecated alias
             Route::put('enrollments/{enrollment}', [StudentSubjectController::class, 'update']);
             Route::delete('enrollments/{enrollment}', [StudentSubjectController::class, 'destroy']);
             Route::get('transcript', [StudentSubjectController::class, 'transcript']);
         });
 
-        // Bulk enrollment (Staff & Admin)
+        // Canonical bulk enrollment batch endpoint
+        Route::post('enrollment-batches', [StudentSubjectController::class, 'createEnrollmentBatch']);
+        // Deprecated alias
         Route::post('enrollments/bulk', [StudentSubjectController::class, 'bulkEnroll']);
     });
 
     // Admin-only routes
     Route::middleware(['auth:sanctum', 'admin'])->group(function () {
         // Students - Update/Delete (Admin only)
+        Route::patch('students/{student}', [StudentController::class, 'update']);
+        // Deprecated alias
         Route::put('students/{student}', [StudentController::class, 'update']);
         Route::delete('students/{student}', [StudentController::class, 'destroy']);
 

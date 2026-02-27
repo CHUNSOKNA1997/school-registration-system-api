@@ -16,6 +16,19 @@ Deprecated endpoints now include:
 
 ## Route Mapping
 
+### Auth / Sessions
+- Old: `POST /api/v1/auth/register`
+- New (canonical): `POST /api/v1/registrations`
+
+- Old: `POST /api/v1/auth/login`
+- New (canonical): `POST /api/v1/sessions`
+
+- Old: `DELETE /api/v1/auth/logout`
+- New (canonical): `DELETE /api/v1/sessions/current`
+
+- Old: `GET /api/v1/auth/user`
+- New (canonical): `GET /api/v1/sessions/current`
+
 ### Profile / Current User
 - Old: `GET /api/v1/profile`
 - New: `GET /api/v1/users/me`
@@ -46,6 +59,18 @@ Deprecated endpoints now include:
   "is_active": true
 }
 ```
+
+### Student Update
+- New (canonical): `PATCH /api/v1/students/{student}`
+- Deprecated alias: `PUT /api/v1/students/{student}`
+
+### Student Enrollments
+- New (canonical): `PATCH /api/v1/students/{student}/enrollments/{enrollment}`
+- Deprecated alias: `PUT /api/v1/students/{student}/enrollments/{enrollment}`
+
+### Enrollment Batches
+- Old: `POST /api/v1/enrollments/bulk`
+- New (canonical): `POST /api/v1/enrollment-batches`
 
 ## Backward Compatibility
 - Old routes remain active during migration window.

@@ -11,9 +11,13 @@ use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response;
 
 class StudentController extends Controller
 {
+    private const CANONICAL_STUDENT_RESOURCE_PATH = '/api/v1/students/{student}';
+    private const SUNSET_AT = '2026-06-30 23:59:59 UTC';
+
     protected function findStudentByIdOrUuid(string $identifier): Student
     {
         return Student::where('uuid', $identifier)
@@ -146,7 +150,18 @@ class StudentController extends Controller
     /**
      * Update the specified student
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id): Response
+    {
+        $response = $this->handleUpdate($request, $id);
+
+        if ($request->isMethod('put')) {
+            return $this->withDeprecationHeaders($response, self::CANONICAL_STUDENT_RESOURCE_PATH);
+        }
+
+        return $response;
+    }
+
+    private function handleUpdate(Request $request, $id): Response
     {
         $student = $this->findStudentByIdOrUuid((string) $id);
 
@@ -271,5 +286,16 @@ class StudentController extends Controller
             'due_date' => now()->addMonth(),
             'status' => $discountAmount >= $baseAmount ? 'paid' : 'pending',
         ]);
+    }
+
+    private function withDeprecationHeaders(Response $response, string $replacementPath): Response
+    {
+        $sunset = gmdate('D, d M Y H:i:s \G\M\T', strtotime(self::SUNSET_AT));
+
+        $response->headers->set('Deprecation', 'true');
+        $response->headers->set('Sunset', $sunset);
+        $response->headers->set('Link', sprintf('<%s>; rel="successor-version"', $replacementPath));
+
+        return $response;
     }
 }
