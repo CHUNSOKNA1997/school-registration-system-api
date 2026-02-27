@@ -57,6 +57,9 @@ Route::group(['prefix' => 'v1', 'as' => 'v1.'], function () {
         Route::post('payments/{payment_uuid}/khqr', [PaymentController::class, 'generateKHQRForPayment']);
         Route::get('payments/{payment_uuid}/status', [PaymentController::class, 'checkPaymentStatus']);
 
+        // Payment plan options for student registration UI
+        Route::get('payment-plans', [StudentController::class, 'paymentPlans']);
+
         // Students - Staff can create/view, Admin can update/delete
         Route::get('students', [StudentController::class, 'index']);
         Route::get('students/{student}', [StudentController::class, 'show']);

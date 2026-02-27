@@ -18,6 +18,8 @@ class StudentController extends Controller
 {
     private const CANONICAL_STUDENT_RESOURCE_PATH = '/api/v1/students/{student}';
     private const SUNSET_AT = '2026-06-30 23:59:59 UTC';
+    private const BASE_MONTHLY_TUITION = 500.00;
+    private const YEARLY_DISCOUNT_RATE = 0.10;
 
     protected function findStudentByIdOrUuid(string $identifier): Student
     {
@@ -95,6 +97,7 @@ class StudentController extends Controller
             'shift' => ['required', 'string', 'in:morning,afternoon,evening,night,weekend'],
             'registration_date' => ['required', 'date'],
             'academic_year' => ['required', 'string', 'max:9'],
+            'payment_plan' => ['nullable', 'string', 'in:monthly,half_year,yearly'],
             'previous_school' => ['nullable', 'string'],
             'photo' => ['nullable', 'string'],
             'documents' => ['nullable', 'array'],
@@ -119,6 +122,9 @@ class StudentController extends Controller
         DB::beginTransaction();
 
         try {
+            $paymentPlan = $validated['payment_plan'] ?? 'monthly';
+            unset($validated['payment_plan']);
+
             // Generate unique student code
             $validated['student_code'] = $this->generateStudentCode($validated['academic_year']);
             $validated['uuid'] = Str::uuid();
@@ -133,7 +139,7 @@ class StudentController extends Controller
             }
 
             // Create initial payment record
-            $this->createInitialPayment($student);
+            $this->createInitialPayment($student, $paymentPlan);
 
             DB::commit();
 
@@ -153,6 +159,24 @@ class StudentController extends Controller
             ->load(['class', 'subjects', 'payments', 'creator']);
 
         return response()->jsonSuccess(StudentResource::make($student));
+    }
+
+    /**
+     * Get available payment plans for frontend selection.
+     */
+    public function paymentPlans(): Response
+    {
+        $plans = collect(['monthly', 'half_year', 'yearly'])
+            ->map(fn (string $plan) => $this->resolvePaymentPlan($plan))
+            ->values()
+            ->all();
+
+        return response()->jsonSuccess([
+            'default_plan' => 'monthly',
+            'currency' => 'USD',
+            'monthly_tuition' => number_format(self::BASE_MONTHLY_TUITION, 2, '.', ''),
+            'plans' => $plans,
+        ]);
     }
 
     /**
@@ -292,16 +316,17 @@ class StudentController extends Controller
     /**
      * Create initial payment record for student
      */
-    protected function createInitialPayment(Student $student)
+    protected function createInitialPayment(Student $student, string $paymentPlan = 'monthly')
     {
-        // Calculate base tuition amount (can be configured or calculated from subjects)
-        $baseAmount = 500.00; // Base tuition fee
+        $plan = $this->resolvePaymentPlan($paymentPlan);
 
-        // Calculate discount for monk students (100% discount)
-        $discountAmount = $student->student_type === 'monk' ? $baseAmount : 0;
+        // Monk students are fully discounted regardless of plan.
+        $discountAmount = $student->student_type === 'monk'
+            ? (float) $plan['amount']
+            : (float) $plan['discount_amount'];
 
         // Calculate final balance
-        $balance = $baseAmount - $discountAmount;
+        $balance = (float) $plan['amount'] - $discountAmount;
 
         // Create payment record
         Payment::create([
@@ -309,17 +334,49 @@ class StudentController extends Controller
             'payment_code' => 'PAY-' . now()->format('Ymd') . '-' . str_pad($student->id, 5, '0', STR_PAD_LEFT),
             'student_id' => $student->id,
             'academic_year' => $student->academic_year,
-            'amount' => $baseAmount,
+            'amount' => (float) $plan['amount'],
             'discount_amount' => $discountAmount,
             'paid_amount' => 0,
             'balance' => $balance,
             'payment_type' => 'tuition',
-            'payment_period' => 'monthly',
+            'payment_period' => $plan['payment_period'],
             // Method is updated when payment is completed (e.g. KHQR => bakong).
             'payment_method' => PaymentMethod::CASH->value,
-            'due_date' => now()->addMonth(),
-            'status' => $discountAmount >= $baseAmount ? 'paid' : 'pending',
+            'due_date' => now()->addMonths((int) $plan['months']),
+            'status' => $discountAmount >= (float) $plan['amount'] ? 'paid' : 'pending',
         ]);
+    }
+
+    private function resolvePaymentPlan(string $paymentPlan): array
+    {
+        $normalizedPlan = strtolower(trim($paymentPlan));
+        $planMonths = match ($normalizedPlan) {
+            'half_year' => 6,
+            'yearly' => 12,
+            default => 1,
+        };
+        $paymentPeriod = $normalizedPlan === 'yearly' ? 'yearly' : 'monthly';
+        $baseAmount = self::BASE_MONTHLY_TUITION * $planMonths;
+        $discountAmount = $normalizedPlan === 'yearly'
+            ? round($baseAmount * self::YEARLY_DISCOUNT_RATE, 2)
+            : 0.00;
+
+        $label = match ($normalizedPlan) {
+            'half_year' => 'Half Year (6 months upfront)',
+            'yearly' => 'Yearly (12 months upfront)',
+            default => 'Monthly',
+        };
+
+        return [
+            'code' => $normalizedPlan === 'half_year' ? 'half_year' : ($normalizedPlan === 'yearly' ? 'yearly' : 'monthly'),
+            'label' => $label,
+            'months' => $planMonths,
+            'payment_period' => $paymentPeriod,
+            'discount_rate' => $normalizedPlan === 'yearly' ? self::YEARLY_DISCOUNT_RATE : 0.0,
+            'amount' => number_format($baseAmount, 2, '.', ''),
+            'discount_amount' => number_format($discountAmount, 2, '.', ''),
+            'payable_amount' => number_format($baseAmount - $discountAmount, 2, '.', ''),
+        ];
     }
 
     private function withDeprecationHeaders(Response $response, string $replacementPath): Response
