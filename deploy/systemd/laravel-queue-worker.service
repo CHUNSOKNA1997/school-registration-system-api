@@ -1,0 +1,18 @@
+[Unit]
+Description=Laravel Queue Worker (School Registration API)
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+Restart=always
+RestartSec=5
+WorkingDirectory=/var/www/school-registration-system-api
+ExecStart=/usr/bin/php /var/www/school-registration-system-api/artisan queue:work database --queue=default --sleep=3 --tries=3 --max-time=3600
+ExecReload=/usr/bin/php /var/www/school-registration-system-api/artisan queue:restart
+StandardOutput=append:/var/www/school-registration-system-api/storage/logs/queue-worker.log
+StandardError=append:/var/www/school-registration-system-api/storage/logs/queue-worker-error.log
+
+[Install]
+WantedBy=multi-user.target
