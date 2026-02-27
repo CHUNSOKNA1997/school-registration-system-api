@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Mail\StudentOnboardingMail;
 use App\Enums\PaymentMethod;
 use App\Models\Classroom;
 use App\Models\Payment;
@@ -297,17 +298,14 @@ class StudentApplicationService
         $activationUrl = $baseUrl . '/activate-account?token=' . urlencode($activationToken);
 
         try {
-            Mail::raw(
-                "Welcome to Starlight School.\n\n"
-                . "Your student login email: {$application->school_email}\n"
-                . "Set your password using this activation link:\n{$activationUrl}\n\n"
-                . "This link will expire in "
-                . max(1, (int) config('student_onboarding.activation_link_ttl_hours', 24))
-                . " hours.",
-                function ($message) use ($application) {
-                    $message->to($application->personal_email)
-                        ->subject('Your Starlight Student Account');
-                }
+            $expiresInHours = max(1, (int) config('student_onboarding.activation_link_ttl_hours', 24));
+
+            Mail::to($application->personal_email)->send(
+                new StudentOnboardingMail(
+                    schoolEmail: $application->school_email,
+                    activationUrl: $activationUrl,
+                    expiresInHours: $expiresInHours
+                )
             );
 
             $application->update([
