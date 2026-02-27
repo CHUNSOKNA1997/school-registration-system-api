@@ -47,7 +47,9 @@ class PaywayPushback extends Model
     // Helper methods
     public function isSuccessful(): bool
     {
-        return (int)$this->status === 0;
+        $status = (string) $this->status;
+
+        return in_array($status, ['0', '00'], true) || (int) $status === 0;
     }
 
     public function getReturnParameters(): ?array

@@ -20,3 +20,6 @@ Route::group(['prefix' => 'v1/payway'], function () {
     // Webhook route (no authentication - PayWay callback)
     Route::post('/webhook', [PaymentController::class, 'webhook']);
 });
+
+// Legacy webhook path kept for backward compatibility with previously generated callbacks.
+Route::post('/payway/webhook', [PaymentController::class, 'webhook']);

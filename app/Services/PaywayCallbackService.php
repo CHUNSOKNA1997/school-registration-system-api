@@ -7,31 +7,26 @@ class PaywayCallbackService
     /**
      * Get the appropriate callback URL for PayWay pushback
      *
-     * @param string $path The URL path (e.g., '/api/payway/webhook')
+     * @param string $path The URL path (e.g., '/api/v1/payway/webhook')
      * @return string The URL encoded in base64
      */
     public static function getCallbackUrl(string $path): string
     {
-        // In production/staging, use the actual URL
-        if (app()->environment('production', 'staging')) {
-            $url = base64_encode(url($path));
-            return $url;
+        // Highest priority: explicit NGROK_URL from configuration.
+        $configuredNgrokUrl = self::normalizeBaseUrl((string) config('services.ngrok.url', ''));
+        if ($configuredNgrokUrl !== null) {
+            return base64_encode(self::buildAbsoluteUrl($configuredNgrokUrl, $path));
         }
 
-        // In development with explicit ngrok URL set
-        if (config('services.ngrok.url')) {
-            $ngrokUrl = rtrim(config('services.ngrok.url'), '/');
-            $url = base64_encode($ngrokUrl . $path);
-
-            return $url;
+        // In production/staging, use the actual app URL.
+        if (app()->environment('production', 'staging')) {
+            return base64_encode(url($path));
         }
 
         // Try to detect ngrok URL automatically
         $possibleNgrokUrl = self::detectNgrokUrl();
         if ($possibleNgrokUrl) {
-            $url = base64_encode($possibleNgrokUrl . $path);
-
-            return $url;
+            return base64_encode(self::buildAbsoluteUrl($possibleNgrokUrl, $path));
         }
 
         // Fallback to regular URL
@@ -64,5 +59,22 @@ class PaywayCallbackService
         }
 
         return null;
+    }
+
+    protected static function normalizeBaseUrl(string $url): ?string
+    {
+        $trimmed = trim($url);
+        if ($trimmed === '') {
+            return null;
+        }
+
+        return rtrim($trimmed, '/');
+    }
+
+    protected static function buildAbsoluteUrl(string $baseUrl, string $path): string
+    {
+        $normalizedPath = '/' . ltrim($path, '/');
+
+        return rtrim($baseUrl, '/') . $normalizedPath;
     }
 }

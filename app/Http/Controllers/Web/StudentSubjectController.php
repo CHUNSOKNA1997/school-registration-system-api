@@ -61,7 +61,7 @@ class StudentSubjectController extends Controller
         $validated = $request->validate([
             'grade' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'status' => ['required', 'string', 'in:active,completed,dropped,pending'],
-            'remarks' => ['nullable', 'string'],
+            'notes' => ['nullable', 'string'],
         ]);
 
         DB::beginTransaction();

@@ -16,9 +16,11 @@
 - ✅ `PaywayService` - Core KHQR logic
 
 ### API Endpoints
-- ✅ `POST /api/payway/khqr/generate` - Generate KHQR
-- ✅ `POST /api/payway/payment/status` - Check payment status
-- ✅ `POST /api/payway/webhook` - Webhook handler
+- ✅ `POST /api/v1/payments/{payment_uuid}/khqr` - Generate KHQR (canonical)
+- ✅ `GET /api/v1/payments/{payment_uuid}/status` - Check payment status (canonical)
+- ✅ `POST /api/v1/payway/webhook` - Webhook handler
+- ✅ `POST /api/v1/payway/khqr/generate` - Deprecated generate endpoint (backward compatibility)
+- ✅ `POST /api/v1/payway/payment/status` - Deprecated status endpoint (backward compatibility)
 
 ## 🚀 How to Use
 
@@ -40,12 +42,11 @@ $payment = Payment::create([
 
 ### 2. Generate KHQR (API Call)
 ```bash
-POST /api/payway/khqr/generate
+POST /api/v1/payments/{{payment-uuid}}/khqr
 Authorization: Bearer {your-token}
 Content-Type: application/json
 
 {
-    "payment_uuid": "{{payment-uuid}}",
     "first_name": "Sophea",
     "last_name": "Chan",
     "phone": "012345678"
@@ -81,15 +82,12 @@ Content-Type: application/json
 ```javascript
 // Check status every 3 seconds
 const interval = setInterval(async () => {
-    const response = await fetch('/api/payway/payment/status', {
-        method: 'POST',
+    const response = await fetch(`/api/v1/payments/${paymentUuid}/status`, {
+        method: 'GET',
         headers: {
             'Authorization': 'Bearer ' + token,
             'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            payment_uuid: paymentUuid
-        })
+        }
     });
 
     const data = await response.json();
@@ -106,10 +104,13 @@ const interval = setInterval(async () => {
 
 Your `.env` already has:
 ```env
-PAYWAY_API_KEY=44f179ec927c49f3a36d80e3c277643d0cb52caa
-PAYWAY_MERCHANT_ID=ec461864
+PAYWAY_API_KEY=your_api_key
+PAYWAY_MERCHANT_ID=your_merchant_id
 PAYWAY_API_URL=https://checkout-sandbox.payway.com.kh/api/payment-gateway/v1/payments/purchase
+PAYWAY_QR_API_URL=https://checkout-sandbox.payway.com.kh/api/payment-gateway/v1/payments/generate-qr
 PAYWAY_CHECK_TRANSACTION_URL=https://checkout-sandbox.payway.com.kh/api/payment-gateway/v1/payments/check-transaction
+PAYWAY_KHQR_API_MODE=purchase
+PAYWAY_REQ_TIME_FORMAT=ymdhis
 ```
 
 ## 📋 Integration with Student Registration
@@ -169,7 +170,7 @@ Route::get('/students/{student}/payment', function (Student $student) {
 
 **Step 1: Login/Get Token**
 ```bash
-POST /api/login
+POST /api/v1/auth/login
 {
     "email": "admin@example.com",
     "password": "password"
@@ -188,16 +189,17 @@ POST /api/payments
 
 **Step 3: Generate KHQR**
 ```bash
-POST /api/payway/khqr/generate
+POST /api/v1/payments/{{uuid}}/khqr
 Authorization: Bearer {token}
 {
-    "payment_uuid": "{{uuid}}"
+    "first_name": "Sophea",
+    "last_name": "Chan"
 }
 ```
 
 **Step 4: Simulate Webhook** (for testing)
 ```bash
-POST /api/payway/webhook
+POST /api/v1/payway/webhook
 {
     "tran_id": "PAY202510-0001",
     "status": "0",
@@ -217,7 +219,7 @@ ngrok http 8000
 
 # Copy ngrok URL
 # Update PayWay dashboard webhook URL to:
-https://your-ngrok-url.ngrok.io/api/payway/webhook
+https://your-ngrok-url.ngrok.io/api/v1/payway/webhook
 ```
 
 ## 📊 Monitoring

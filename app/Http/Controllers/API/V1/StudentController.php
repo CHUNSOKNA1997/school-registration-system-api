@@ -14,6 +14,13 @@ use Illuminate\Support\Str;
 
 class StudentController extends Controller
 {
+    protected function findStudentByIdOrUuid(string $identifier): Student
+    {
+        return Student::where('uuid', $identifier)
+            ->orWhere('id', $identifier)
+            ->firstOrFail();
+    }
+
     /**
      * Display a listing of students
      */
@@ -130,7 +137,8 @@ class StudentController extends Controller
      */
     public function show($id)
     {
-        $student = Student::with(['class', 'subjects', 'payments', 'creator'])->findOrFail($id);
+        $student = $this->findStudentByIdOrUuid((string) $id)
+            ->load(['class', 'subjects', 'payments', 'creator']);
 
         return response()->jsonSuccess(StudentResource::make($student));
     }
@@ -140,7 +148,7 @@ class StudentController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $student = Student::findOrFail($id);
+        $student = $this->findStudentByIdOrUuid((string) $id);
 
         $validated = $request->validate([
             'first_name' => ['sometimes', 'string', 'max:100'],
@@ -190,7 +198,7 @@ class StudentController extends Controller
      */
     public function destroy($id)
     {
-        $student = Student::findOrFail($id);
+        $student = $this->findStudentByIdOrUuid((string) $id);
 
         DB::beginTransaction();
 

@@ -12,12 +12,19 @@ use Illuminate\Support\Str;
 
 class StudentSubjectController extends Controller
 {
+    protected function findStudentByIdOrUuid(string $identifier): Student
+    {
+        return Student::where('uuid', $identifier)
+            ->orWhere('id', $identifier)
+            ->firstOrFail();
+    }
+
     /**
      * Get all enrollments for a student
      */
     public function index(Request $request, $studentId)
     {
-        $student = Student::findOrFail($studentId);
+        $student = $this->findStudentByIdOrUuid((string) $studentId);
 
         $query = StudentSubject::with(['subject', 'teacher'])
             ->where('student_id', $student->id);
@@ -42,7 +49,7 @@ class StudentSubjectController extends Controller
      */
     public function store(Request $request, $studentId)
     {
-        $student = Student::findOrFail($studentId);
+        $student = $this->findStudentByIdOrUuid((string) $studentId);
 
         $validated = $request->validate([
             'subject_id' => ['required', 'exists:subjects,id'],
@@ -95,7 +102,7 @@ class StudentSubjectController extends Controller
      */
     public function update(Request $request, $studentId, $enrollmentId)
     {
-        $student = Student::findOrFail($studentId);
+        $student = $this->findStudentByIdOrUuid((string) $studentId);
         $enrollment = StudentSubject::where('student_id', $student->id)
             ->findOrFail($enrollmentId);
 
@@ -131,7 +138,7 @@ class StudentSubjectController extends Controller
      */
     public function destroy($studentId, $enrollmentId)
     {
-        $student = Student::findOrFail($studentId);
+        $student = $this->findStudentByIdOrUuid((string) $studentId);
         $enrollment = StudentSubject::where('student_id', $student->id)
             ->findOrFail($enrollmentId);
 
@@ -217,7 +224,8 @@ class StudentSubjectController extends Controller
      */
     public function transcript($studentId)
     {
-        $student = Student::with(['class'])->findOrFail($studentId);
+        $student = $this->findStudentByIdOrUuid((string) $studentId)
+            ->load(['class']);
 
         $enrollments = StudentSubject::with(['subject', 'teacher'])
             ->where('student_id', $student->id)

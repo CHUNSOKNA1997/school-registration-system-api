@@ -88,7 +88,7 @@ class Student extends Model
     public function subjects()
     {
         return $this->belongsToMany(Subject::class, 'student_subjects')
-            ->withPivot('teacher_id', 'enrolled_date', 'status', 'grade', 'remarks')
+            ->withPivot('teacher_id', 'enrolled_date', 'status', 'grade', 'notes')
             ->withTimestamps();
     }
 

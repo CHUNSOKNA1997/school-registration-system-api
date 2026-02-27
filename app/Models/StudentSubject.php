@@ -17,7 +17,7 @@ class StudentSubject extends Pivot
         'enrolled_date',
         'status',
         'grade',
-        'remarks',
+        'notes',
     ];
 
     protected function casts(): array

@@ -44,21 +44,20 @@ This document describes the PayWay KHQR (ABA Bakong QR) integration for the Scho
 
 ### Controllers
 
-**PaymentController** (`app/Http/Controllers/API/PaymentController.php`)
-- `generateKHQR()` - API endpoint to generate QR
+**PaymentController** (`app/Http/Controllers/API/V1/PaymentController.php`)
+- `generateKHQRForPayment()` - Canonical API endpoint to generate QR
 - `webhook()` - Handles PayWay callbacks
-- `checkStatus()` - Check payment status
+- `checkPaymentStatus()` - Canonical payment status endpoint
 
 ## API Endpoints
 
 ### 1. Generate KHQR
 ```
-POST /api/payway/khqr/generate
+POST /api/v1/payments/{payment_uuid}/khqr
 Authorization: Bearer {token}
 
 Request Body:
 {
-    "payment_uuid": "uuid-here",
     "first_name": "John",      // optional
     "last_name": "Doe",         // optional
     "email": "john@email.com",  // optional
@@ -81,13 +80,8 @@ Response:
 
 ### 2. Check Payment Status
 ```
-POST /api/payway/payment/status
+GET /api/v1/payments/{payment_uuid}/status
 Authorization: Bearer {token}
-
-Request Body:
-{
-    "payment_uuid": "uuid-here"
-}
 
 Response:
 {
@@ -110,7 +104,7 @@ Response:
 
 ### 3. Webhook (PayWay Callback)
 ```
-POST /api/payway/webhook
+POST /api/v1/payway/webhook
 
 This endpoint receives callbacks from PayWay.
 No authentication required.
@@ -135,14 +129,13 @@ $payment = Payment::create([
 ### 2. Generate KHQR
 ```javascript
 // Frontend calls API
-const response = await fetch('/api/payway/khqr/generate', {
+const response = await fetch(`/api/v1/payments/${payment.uuid}/khqr`, {
     method: 'POST',
     headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-        payment_uuid: payment.uuid,
         first_name: student.first_name,
         last_name: student.last_name,
         phone: student.phone
@@ -160,7 +153,7 @@ const data = await response.json();
 - Completes payment in ABA app
 
 ### 4. PayWay Sends Webhook
-- PayWay automatically calls `/api/payway/webhook`
+- PayWay automatically calls `/api/v1/payway/webhook`
 - System updates payment status
 - Transaction marked as success/failed
 
@@ -168,15 +161,12 @@ const data = await response.json();
 ```javascript
 // Poll every 3 seconds
 setInterval(async () => {
-    const response = await fetch('/api/payway/payment/status', {
-        method: 'POST',
+    const response = await fetch(`/api/v1/payments/${payment.uuid}/status`, {
+        method: 'GET',
         headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            payment_uuid: payment.uuid
-        })
+        }
     });
 
     const data = await response.json();
@@ -203,11 +193,14 @@ return [
     'api_key' => env('PAYWAY_API_KEY'),
     'merchant_id' => env('PAYWAY_MERCHANT_ID'),
     'api_url' => env('PAYWAY_API_URL'),
+    'qr_api_url' => env('PAYWAY_QR_API_URL'),
     'check_transaction_api_url' => env('PAYWAY_CHECK_TRANSACTION_URL'),
+    'req_time_format' => env('PAYWAY_REQ_TIME_FORMAT', 'ymdhis'),
     'log_all_events' => env('PAYWAY_LOG_ALL_EVENTS', true),
 
     'khqr' => [
-        'payment_option_code' => 'khqr',
+        'api_mode' => env('PAYWAY_KHQR_API_MODE', 'purchase'),
+        'payment_option_code' => 'abapay',
         'qr_expiry_minutes' => 15,
     ],
 ];
@@ -236,11 +229,10 @@ $hash = base64_encode(hash_hmac('sha512', $dataToHash, $apiKey, true));
 
 ### 1. Test KHQR Generation
 ```bash
-curl -X POST http://localhost:8000/api/payway/khqr/generate \
+curl -X POST http://localhost:8000/api/v1/payments/payment-uuid-here/khqr \
   -H "Authorization: Bearer your_token" \
   -H "Content-Type: application/json" \
   -d '{
-    "payment_uuid": "payment-uuid-here",
     "first_name": "Test",
     "last_name": "User",
     "phone": "0123456789"
@@ -249,7 +241,7 @@ curl -X POST http://localhost:8000/api/payway/khqr/generate \
 
 ### 2. Test Webhook Locally
 ```bash
-curl -X POST http://localhost:8000/api/payway/webhook \
+curl -X POST http://localhost:8000/api/v1/payway/webhook \
   -H "Content-Type: application/json" \
   -d '{
     "tran_id": "PAY202510-0001",
@@ -261,12 +253,9 @@ curl -X POST http://localhost:8000/api/payway/webhook \
 
 ### 3. Check Payment Status
 ```bash
-curl -X POST http://localhost:8000/api/payway/payment/status \
+curl -X GET http://localhost:8000/api/v1/payments/payment-uuid-here/status \
   -H "Authorization: Bearer your_token" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "payment_uuid": "payment-uuid-here"
-  }'
+  -H "Content-Type: application/json"
 ```
 
 ## Logging

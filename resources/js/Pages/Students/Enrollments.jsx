@@ -38,7 +38,7 @@ export default function StudentEnrollments({ auth, student, enrollments, subject
     const { data: editData, setData: setEditData, put, processing: editProcessing, errors: editErrors } = useForm({
         grade: '',
         status: '',
-        remarks: '',
+        notes: '',
     });
 
     const handleAddEnrollment = (e) => {
@@ -88,7 +88,7 @@ export default function StudentEnrollments({ auth, student, enrollments, subject
         setEditData({
             grade: enrollment.grade || '',
             status: enrollment.status || 'active',
-            remarks: enrollment.remarks || '',
+            notes: enrollment.notes || '',
         });
         setEditDialog({ open: true, enrollment });
     };
@@ -263,7 +263,7 @@ export default function StudentEnrollments({ auth, student, enrollments, subject
                                             </TableCell>
                                             <TableCell>{getStatusBadge(enrollment.status)}</TableCell>
                                             <TableCell className="max-w-xs truncate">
-                                                {enrollment.remarks || '-'}
+                                                {enrollment.notes || '-'}
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <div className="flex items-center justify-end gap-2">
@@ -456,13 +456,13 @@ export default function StudentEnrollments({ auth, student, enrollments, subject
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="remarks" className="text-white/80">
+                                <Label htmlFor="notes" className="text-white/80">
                                     Remarks
                                 </Label>
                                 <Textarea
-                                    id="remarks"
-                                    value={editData.remarks}
-                                    onChange={(e) => setEditData('remarks', e.target.value)}
+                                    id="notes"
+                                    value={editData.notes}
+                                    onChange={(e) => setEditData('notes', e.target.value)}
                                     className="bg-[#0a0a0a] border-white/10 text-white"
                                     placeholder="Add any notes or comments..."
                                 />
