@@ -300,7 +300,7 @@ class StudentApplicationService
         try {
             $expiresInHours = max(1, (int) config('student_onboarding.activation_link_ttl_hours', 24));
 
-            Mail::to($application->personal_email)->send(
+            Mail::to($application->personal_email)->queue(
                 new StudentOnboardingMail(
                     schoolEmail: $application->school_email,
                     activationUrl: $activationUrl,

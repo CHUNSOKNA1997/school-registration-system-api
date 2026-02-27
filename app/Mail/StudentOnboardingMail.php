@@ -4,9 +4,10 @@ namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\SerializesModels;
 
-class StudentOnboardingMail extends Mailable
+class StudentOnboardingMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
@@ -15,6 +16,7 @@ class StudentOnboardingMail extends Mailable
         public string $activationUrl,
         public int $expiresInHours
     ) {
+        $this->afterCommit();
     }
 
     public function build(): self
