@@ -108,6 +108,11 @@ class Student extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function application()
+    {
+        return $this->hasOne(StudentApplication::class);
+    }
+
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');

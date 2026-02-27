@@ -68,6 +68,11 @@ class User extends Authenticatable
         return $this->hasOne(Student::class, 'user_id');
     }
 
+    public function studentApplication()
+    {
+        return $this->hasOne(StudentApplication::class, 'user_id');
+    }
+
     // Scopes
     public function scopeAdmins($query)
     {

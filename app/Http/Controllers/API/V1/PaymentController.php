@@ -8,6 +8,7 @@ use App\Models\Payment;
 use App\Models\PaywayTransaction;
 use App\Models\PaywayPushback;
 use App\Services\PaywayService;
+use App\Services\StudentApplicationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -16,10 +17,12 @@ use Symfony\Component\HttpFoundation\Response;
 class PaymentController extends Controller
 {
     protected $paywayService;
+    protected $studentApplicationService;
 
-    public function __construct(PaywayService $paywayService)
+    public function __construct(PaywayService $paywayService, StudentApplicationService $studentApplicationService)
     {
         $this->paywayService = $paywayService;
+        $this->studentApplicationService = $studentApplicationService;
     }
 
     public function createCheckoutSession(Request $request, string $payment_uuid)
@@ -102,6 +105,7 @@ class PaymentController extends Controller
 
         DB::beginTransaction();
         try {
+            $shouldProvisionStudentAccount = false;
             // Create pushback record
             $pushback = PaywayPushback::create([
                 'tran_id' => $request->tran_id,
@@ -237,6 +241,7 @@ class PaymentController extends Controller
                     'payment_date' => now(),
                     'payment_method' => PaymentMethod::BAKONG->value,
                 ]);
+                $shouldProvisionStudentAccount = true;
             } else {
                 // Failure path
                 $transaction->markAsFailed($pushback);
@@ -247,6 +252,10 @@ class PaymentController extends Controller
             }
 
             DB::commit();
+
+            if ($shouldProvisionStudentAccount) {
+                $this->studentApplicationService->provisionFromPaidPayment($payment->fresh());
+            }
 
             // Always return success to PayWay
             return response()->json(['status' => 'success']);
@@ -391,6 +400,8 @@ class PaymentController extends Controller
                     'payment_method' => PaymentMethod::BAKONG->value,
                 ]);
             });
+
+            $this->studentApplicationService->provisionFromPaidPayment($payment->fresh());
         } catch (\Throwable $e) {
             Log::warning('PayWay status reconciliation skipped (check-transaction failed)', [
                 'payment_uuid' => $payment->uuid,

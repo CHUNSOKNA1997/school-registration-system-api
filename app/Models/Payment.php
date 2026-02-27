@@ -97,6 +97,11 @@ class Payment extends Model
         return $this->hasOne(PaywayTransaction::class);
     }
 
+    public function application()
+    {
+        return $this->hasOne(StudentApplication::class);
+    }
+
     // Scopes
     public function scopePaid($query)
     {

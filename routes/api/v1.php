@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\V1\AuthController;
+use App\Http\Controllers\API\V1\ApplicationController;
 use App\Http\Controllers\API\V1\ClassroomController;
 use App\Http\Controllers\API\V1\DashboardController;
 use App\Http\Controllers\API\V1\PaymentController;
@@ -15,6 +16,13 @@ Route::group(['prefix' => 'v1', 'as' => 'v1.'], function () {
     // Canonical auth/session routes
     Route::post('registrations', [AuthController::class, 'createRegistration']);
     Route::post('sessions', [AuthController::class, 'createSession']);
+    Route::post('student-accounts/activate', [ApplicationController::class, 'activateAccount']);
+    Route::post('applications', [ApplicationController::class, 'submit']);
+    Route::post('applications/{application_uuid}/checkout-sessions', [ApplicationController::class, 'createCheckoutSession']);
+    Route::get('applications/{application_uuid}/payment-status', [ApplicationController::class, 'showPaymentStatus']);
+    // Public payment plan options for application UI
+    Route::get('payment-plans', [StudentController::class, 'paymentPlans']);
+
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('sessions/current', [AuthController::class, 'showCurrentSession']);
         Route::delete('sessions/current', [AuthController::class, 'destroyCurrentSession']);
@@ -36,8 +44,7 @@ Route::group(['prefix' => 'v1', 'as' => 'v1.'], function () {
         Route::post('payments/{payment_uuid}/checkout-sessions', [PaymentController::class, 'createCheckoutSession']);
         Route::get('payments/{payment_uuid}', [PaymentController::class, 'showPayment']);
 
-        // Payment plan options for student registration UI
-        Route::get('payment-plans', [StudentController::class, 'paymentPlans']);
+        // Authenticated student self-registration (legacy flow compatibility)
         Route::post('student-registrations', [StudentController::class, 'selfRegister']);
 
         // Students - Staff can create/view, Admin can update/delete
