@@ -8,9 +8,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends Controller
 {
+    private const DEPRECATED_PROFILE_PATH = '/api/v1/users/me';
+    private const DEPRECATED_ACTIVATE_PATH = '/api/v1/users/{id}';
+    private const SUNSET_AT = '2026-06-30 23:59:59 UTC';
+
     /**
      * Display a listing of users.
      */
@@ -217,24 +222,46 @@ class UserController extends Controller
         $user->is_active = true;
         $user->save();
 
-        return response()->jsonSuccess([
+        $response = response()->jsonSuccess([
             'message' => 'User activated successfully',
             'user' => $user,
         ]);
+
+        return $this->withDeprecationHeaders($response, self::DEPRECATED_ACTIVATE_PATH);
     }
 
     /**
-     * Get current user's profile.
+     * Deprecated endpoint. Use GET /api/v1/users/me.
      */
     public function profile(Request $request)
+    {
+        $response = $this->userMe($request);
+
+        return $this->withDeprecationHeaders($response, self::DEPRECATED_PROFILE_PATH);
+    }
+
+    /**
+     * Canonical endpoint for current user profile.
+     */
+    public function userMe(Request $request)
     {
         return response()->jsonSuccess($request->user());
     }
 
     /**
-     * Update current user's profile.
+     * Deprecated endpoint. Use PATCH /api/v1/users/me.
      */
     public function updateProfile(Request $request)
+    {
+        $response = $this->updateUserMe($request);
+
+        return $this->withDeprecationHeaders($response, self::DEPRECATED_PROFILE_PATH);
+    }
+
+    /**
+     * Canonical endpoint for updating current user profile.
+     */
+    public function updateUserMe(Request $request)
     {
         $user = $request->user();
 
@@ -283,5 +310,16 @@ class UserController extends Controller
             'message' => 'Profile updated successfully',
             'user' => $user,
         ]);
+    }
+
+    private function withDeprecationHeaders(Response $response, string $replacementPath): Response
+    {
+        $sunset = gmdate('D, d M Y H:i:s \G\M\T', strtotime(self::SUNSET_AT));
+
+        $response->headers->set('Deprecation', 'true');
+        $response->headers->set('Sunset', $sunset);
+        $response->headers->set('Link', sprintf('<%s>; rel="successor-version"', $replacementPath));
+
+        return $response;
     }
 }

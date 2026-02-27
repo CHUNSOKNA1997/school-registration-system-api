@@ -3,6 +3,7 @@
 use App\Http\Controllers\API\V1\AuthController;
 use App\Http\Controllers\API\V1\ClassroomController;
 use App\Http\Controllers\API\V1\DashboardController;
+use App\Http\Controllers\API\V1\PaymentController;
 use App\Http\Controllers\API\V1\StudentController;
 use App\Http\Controllers\API\V1\StudentSubjectController;
 use App\Http\Controllers\API\V1\SubjectController;
@@ -31,9 +32,17 @@ Route::group(['prefix' => 'v1', 'as' => 'v1.'], function () {
         Route::get('dashboard/payment-trends', [DashboardController::class, 'paymentTrends']);
         Route::get('dashboard/top-students', [DashboardController::class, 'topStudents']);
 
-        // Profile
+        // Canonical self-profile routes
+        Route::get('users/me', [UserController::class, 'userMe']);
+        Route::patch('users/me', [UserController::class, 'updateUserMe']);
+
+        // Deprecated self-profile routes
         Route::get('profile', [UserController::class, 'profile']);
         Route::put('profile', [UserController::class, 'updateProfile']);
+
+        // Canonical payment routes
+        Route::post('payments/{payment_uuid}/khqr', [PaymentController::class, 'generateKHQRForPayment']);
+        Route::get('payments/{payment_uuid}/status', [PaymentController::class, 'checkPaymentStatus']);
 
         // Students - Staff can create/view, Admin can update/delete
         Route::get('students', [StudentController::class, 'index']);
@@ -64,7 +73,9 @@ Route::group(['prefix' => 'v1', 'as' => 'v1.'], function () {
         Route::post('users', [UserController::class, 'store']);
         Route::get('users/{id}', [UserController::class, 'show']);
         Route::put('users/{id}', [UserController::class, 'update']);
+        Route::patch('users/{id}', [UserController::class, 'update']);
         Route::delete('users/{id}', [UserController::class, 'destroy']);
+        // Deprecated endpoint. Use PATCH /api/v1/users/{id} with {"is_active": true}
         Route::post('users/{id}/activate', [UserController::class, 'activate']);
 
         Route::apiResource('teachers', TeacherController::class);

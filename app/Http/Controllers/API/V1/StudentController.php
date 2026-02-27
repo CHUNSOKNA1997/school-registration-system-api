@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API\V1;
 
+use App\Enums\PaymentMethod;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\StudentResource;
 use App\Models\Classroom;
@@ -257,7 +258,8 @@ class StudentController extends Controller
             'balance' => $balance,
             'payment_type' => 'tuition',
             'payment_period' => 'monthly',
-            'payment_method' => 'pending',
+            // Method is updated when payment is completed (e.g. KHQR => bakong).
+            'payment_method' => PaymentMethod::CASH->value,
             'due_date' => now()->addMonth(),
             'status' => $discountAmount >= $baseAmount ? 'paid' : 'pending',
         ]);

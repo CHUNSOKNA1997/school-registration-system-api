@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API\V1;
 
+use App\Enums\PaymentMethod;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\PaywayTransaction;
@@ -9,9 +10,14 @@ use App\Models\PaywayPushback;
 use App\Services\PaywayService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\Response;
 
 class PaymentController extends Controller
 {
+    private const DEPRECATED_PAYMENT_GENERATE_PATH = '/api/v1/payments/{payment_uuid}/khqr';
+    private const DEPRECATED_PAYMENT_STATUS_PATH = '/api/v1/payments/{payment_uuid}/status';
+    private const SUNSET_AT = '2026-06-30 23:59:59 UTC';
+
     protected $paywayService;
 
     public function __construct(PaywayService $paywayService)
@@ -35,41 +41,34 @@ class PaymentController extends Controller
             'phone' => 'nullable|string',
         ]);
 
-        try {
-            $payment = Payment::where('uuid', $request->payment_uuid)->firstOrFail();
+        $response = $this->handleGenerateKHQR($request->payment_uuid, [
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+        ]);
 
-            // Check if payment is already paid
-            if ($payment->status === 'paid') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Payment has already been completed',
-                ], 400);
-            }
+        return $this->withDeprecationHeaders($response, self::DEPRECATED_PAYMENT_GENERATE_PATH);
+    }
 
-            $customerData = [
-                'first_name' => $request->first_name,
-                'last_name' => $request->last_name,
-                'email' => $request->email,
-                'phone' => $request->phone,
-            ];
+    /**
+     * Canonical endpoint for KHQR generation.
+     */
+    public function generateKHQRForPayment(Request $request, string $payment_uuid)
+    {
+        $request->validate([
+            'first_name' => 'nullable|string',
+            'last_name' => 'nullable|string',
+            'email' => 'nullable|email',
+            'phone' => 'nullable|string',
+        ]);
 
-            $result = $this->paywayService->generateKHQR($payment, $customerData);
-
-            if (!$result['success']) {
-                return response()->json($result, 500);
-            }
-
-            return response()->json([
-                'success' => true,
-                'data' => $result,
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to generate KHQR',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+        return $this->handleGenerateKHQR($payment_uuid, [
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+        ]);
     }
 
     /**
@@ -119,7 +118,7 @@ class PaymentController extends Controller
                     'khqr_reference' => $request->apv,
                     'paid_at' => now(),
                     'payment_date' => now(),
-                    'payment_method' => 'KHQR',
+                    'payment_method' => PaymentMethod::BAKONG->value,
                 ]);
             } else {
                 // Failure path
@@ -154,8 +153,55 @@ class PaymentController extends Controller
             'payment_uuid' => 'required|string',
         ]);
 
+        $response = $this->handleCheckStatus($request->payment_uuid);
+
+        return $this->withDeprecationHeaders($response, self::DEPRECATED_PAYMENT_STATUS_PATH);
+    }
+
+    /**
+     * Canonical endpoint for payment status checks.
+     */
+    public function checkPaymentStatus(string $payment_uuid)
+    {
+        return $this->handleCheckStatus($payment_uuid);
+    }
+
+    private function handleGenerateKHQR(string $paymentUuid, array $customerData): Response
+    {
         try {
-            $payment = Payment::where('uuid', $request->payment_uuid)
+            $payment = Payment::where('uuid', $paymentUuid)->firstOrFail();
+
+            // Check if payment is already paid
+            if ($payment->status === 'paid') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Payment has already been completed',
+                ], 400);
+            }
+
+            $result = $this->paywayService->generateKHQR($payment, $customerData);
+
+            if (!$result['success']) {
+                return response()->json($result, 500);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $result,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate KHQR',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    private function handleCheckStatus(string $paymentUuid): Response
+    {
+        try {
+            $payment = Payment::where('uuid', $paymentUuid)
                 ->with('paywayTransaction')
                 ->firstOrFail();
 
@@ -181,5 +227,16 @@ class PaymentController extends Controller
                 'message' => 'Payment not found',
             ], 404);
         }
+    }
+
+    private function withDeprecationHeaders(Response $response, string $replacementPath): Response
+    {
+        $sunset = gmdate('D, d M Y H:i:s \G\M\T', strtotime(self::SUNSET_AT));
+
+        $response->headers->set('Deprecation', 'true');
+        $response->headers->set('Sunset', $sunset);
+        $response->headers->set('Link', sprintf('<%s>; rel="successor-version"', $replacementPath));
+
+        return $response;
     }
 }

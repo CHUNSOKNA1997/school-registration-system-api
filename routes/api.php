@@ -6,7 +6,10 @@ use App\Http\Controllers\API\V1\PaymentController;
 // Include v1 routes
 include __DIR__ . '/api/v1.php';
 
-// Payway Payment Routes
+// Deprecated Payway payment routes (kept for backward compatibility)
+// Canonical replacements:
+// - POST /api/v1/payments/{payment_uuid}/khqr
+// - GET  /api/v1/payments/{payment_uuid}/status
 Route::group(['prefix' => 'v1/payway'], function () {
     // Protected routes (require authentication)
     Route::middleware(['auth:sanctum'])->group(function () {
