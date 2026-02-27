@@ -16,9 +16,12 @@
 - ✅ `PaywayService` - Core KHQR logic
 
 ### API Endpoints
-- ✅ `POST /api/v1/payments/{payment_uuid}/khqr` - Generate KHQR (canonical)
-- ✅ `GET /api/v1/payments/{payment_uuid}/status` - Check payment status (canonical)
-- ✅ `POST /api/v1/payway/webhook` - Webhook handler
+- ✅ `POST /api/v1/payments/{payment_uuid}/checkout-sessions` - Create checkout session (canonical)
+- ✅ `GET /api/v1/payments/{payment_uuid}` - Get payment resource/status (canonical)
+- ✅ `POST /api/v1/webhooks/payway` - Webhook handler (canonical)
+- ✅ `POST /api/v1/payments/{payment_uuid}/khqr` - Deprecated generate alias
+- ✅ `GET /api/v1/payments/{payment_uuid}/status` - Deprecated status alias
+- ✅ `POST /api/v1/payway/webhook` - Deprecated webhook alias
 - ✅ `POST /api/v1/payway/khqr/generate` - Deprecated generate endpoint (backward compatibility)
 - ✅ `POST /api/v1/payway/payment/status` - Deprecated status endpoint (backward compatibility)
 
@@ -42,7 +45,7 @@ $payment = Payment::create([
 
 ### 2. Generate KHQR (API Call)
 ```bash
-POST /api/v1/payments/{{payment-uuid}}/khqr
+POST /api/v1/payments/{{payment-uuid}}/checkout-sessions
 Authorization: Bearer {your-token}
 Content-Type: application/json
 
@@ -82,7 +85,7 @@ Content-Type: application/json
 ```javascript
 // Check status every 3 seconds
 const interval = setInterval(async () => {
-    const response = await fetch(`/api/v1/payments/${paymentUuid}/status`, {
+    const response = await fetch(`/api/v1/payments/${paymentUuid}`, {
         method: 'GET',
         headers: {
             'Authorization': 'Bearer ' + token,
@@ -189,7 +192,7 @@ POST /api/payments
 
 **Step 3: Generate KHQR**
 ```bash
-POST /api/v1/payments/{{uuid}}/khqr
+POST /api/v1/payments/{{uuid}}/checkout-sessions
 Authorization: Bearer {token}
 {
     "first_name": "Sophea",
@@ -199,7 +202,7 @@ Authorization: Bearer {token}
 
 **Step 4: Simulate Webhook** (for testing)
 ```bash
-POST /api/v1/payway/webhook
+POST /api/v1/webhooks/payway
 {
     "tran_id": "PAY202510-0001",
     "status": "0",
@@ -219,7 +222,7 @@ ngrok http 8000
 
 # Copy ngrok URL
 # Update PayWay dashboard webhook URL to:
-https://your-ngrok-url.ngrok.io/api/v1/payway/webhook
+https://your-ngrok-url.ngrok.io/api/v1/webhooks/payway
 ```
 
 ## 📊 Monitoring

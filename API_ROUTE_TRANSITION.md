@@ -25,10 +25,17 @@ Deprecated endpoints now include:
 
 ### Payment (KHQR / Status)
 - Old: `POST /api/v1/payway/khqr/generate` with body `payment_uuid`
-- New: `POST /api/v1/payments/{payment_uuid}/khqr`
+- New (canonical): `POST /api/v1/payments/{payment_uuid}/checkout-sessions`
+- Deprecated alias: `POST /api/v1/payments/{payment_uuid}/khqr`
 
 - Old: `POST /api/v1/payway/payment/status` with body `payment_uuid`
-- New: `GET /api/v1/payments/{payment_uuid}/status`
+- New (canonical): `GET /api/v1/payments/{payment_uuid}`
+- Deprecated alias: `GET /api/v1/payments/{payment_uuid}/status`
+
+### PayWay Webhook
+- New (canonical): `POST /api/v1/webhooks/payway`
+- Deprecated alias: `POST /api/v1/payway/webhook`
+- Legacy alias: `POST /api/payway/webhook`
 
 ### User Activation
 - Old: `POST /api/v1/users/{id}/activate`

@@ -15,8 +15,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 class PaymentController extends Controller
 {
-    private const DEPRECATED_PAYMENT_GENERATE_PATH = '/api/v1/payway/khqr/generate';
-    private const DEPRECATED_PAYMENT_STATUS_PATH = '/api/v1/payway/payment/status';
+    private const CANONICAL_PAYMENT_CHECKOUT_SESSION_PATH = '/api/v1/payments/{payment_uuid}/checkout-sessions';
+    private const CANONICAL_PAYMENT_RESOURCE_PATH = '/api/v1/payments/{payment_uuid}';
+    private const CANONICAL_PAYWAY_WEBHOOK_PATH = '/api/v1/webhooks/payway';
     private const SUNSET_AT = '2026-06-30 23:59:59 UTC';
 
     protected $paywayService;
@@ -27,10 +28,8 @@ class PaymentController extends Controller
     }
 
     /**
-     * Generate KHQR for a payment
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * Legacy endpoint: payment UUID in request body.
+     * Successor: POST /api/v1/payments/{payment_uuid}/checkout-sessions
      */
     public function generateKHQR(Request $request)
     {
@@ -49,13 +48,36 @@ class PaymentController extends Controller
             'phone' => $request->phone,
         ]);
 
-        return $this->withDeprecationHeaders($response, self::DEPRECATED_PAYMENT_GENERATE_PATH);
+        return $this->withDeprecationHeaders($response, self::CANONICAL_PAYMENT_CHECKOUT_SESSION_PATH);
     }
 
     /**
-     * Canonical endpoint for KHQR generation.
+     * Deprecated alias endpoint.
+     * Successor: POST /api/v1/payments/{payment_uuid}/checkout-sessions
      */
     public function generateKHQRForPayment(Request $request, string $payment_uuid)
+    {
+        $request->validate([
+            'first_name' => 'nullable|string',
+            'last_name' => 'nullable|string',
+            'email' => 'nullable|email',
+            'phone' => 'nullable|string',
+        ]);
+
+        $response = $this->handleGenerateKHQR($payment_uuid, [
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+        ]);
+
+        return $this->withDeprecationHeaders($response, self::CANONICAL_PAYMENT_CHECKOUT_SESSION_PATH);
+    }
+
+    /**
+     * Canonical endpoint for creating a payment checkout session.
+     */
+    public function createCheckoutSession(Request $request, string $payment_uuid)
     {
         $request->validate([
             'first_name' => 'nullable|string',
@@ -73,12 +95,25 @@ class PaymentController extends Controller
     }
 
     /**
-     * Handle webhook from PayWay (pushback)
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * Canonical webhook endpoint.
+     */
+    public function webhookCanonical(Request $request)
+    {
+        return $this->handleWebhook($request);
+    }
+
+    /**
+     * Deprecated webhook alias endpoint.
+     * Successor: POST /api/v1/webhooks/payway
      */
     public function webhook(Request $request)
+    {
+        $response = $this->handleWebhook($request);
+
+        return $this->withDeprecationHeaders($response, self::CANONICAL_PAYWAY_WEBHOOK_PATH);
+    }
+
+    private function handleWebhook(Request $request): Response
     {
         $signatureHeader = (string) config('payway.webhook.signature_header', 'X-PayWay-Signature');
         $providedSignature = $request->header($signatureHeader);
@@ -295,10 +330,8 @@ class PaymentController extends Controller
     }
 
     /**
-     * Check payment status
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * Legacy endpoint: payment UUID in request body.
+     * Successor: GET /api/v1/payments/{payment_uuid}
      */
     public function checkStatus(Request $request)
     {
@@ -308,13 +341,24 @@ class PaymentController extends Controller
 
         $response = $this->handleCheckStatus($request->payment_uuid);
 
-        return $this->withDeprecationHeaders($response, self::DEPRECATED_PAYMENT_STATUS_PATH);
+        return $this->withDeprecationHeaders($response, self::CANONICAL_PAYMENT_RESOURCE_PATH);
     }
 
     /**
-     * Canonical endpoint for payment status checks.
+     * Deprecated alias endpoint.
+     * Successor: GET /api/v1/payments/{payment_uuid}
      */
     public function checkPaymentStatus(string $payment_uuid)
+    {
+        $response = $this->handleCheckStatus($payment_uuid);
+
+        return $this->withDeprecationHeaders($response, self::CANONICAL_PAYMENT_RESOURCE_PATH);
+    }
+
+    /**
+     * Canonical payment resource read endpoint.
+     */
+    public function showPayment(string $payment_uuid)
     {
         return $this->handleCheckStatus($payment_uuid);
     }

@@ -40,7 +40,11 @@ Route::group(['prefix' => 'v1', 'as' => 'v1.'], function () {
         Route::get('profile', [UserController::class, 'profile']);
         Route::put('profile', [UserController::class, 'updateProfile']);
 
-        // Canonical payment routes
+        // Canonical payment routes (REST-style)
+        Route::post('payments/{payment_uuid}/checkout-sessions', [PaymentController::class, 'createCheckoutSession']);
+        Route::get('payments/{payment_uuid}', [PaymentController::class, 'showPayment']);
+
+        // Deprecated payment aliases (kept non-breaking)
         Route::post('payments/{payment_uuid}/khqr', [PaymentController::class, 'generateKHQRForPayment']);
         Route::get('payments/{payment_uuid}/status', [PaymentController::class, 'checkPaymentStatus']);
 

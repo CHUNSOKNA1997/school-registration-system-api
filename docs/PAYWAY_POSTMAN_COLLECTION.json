@@ -40,11 +40,11 @@
           "raw": "{\n    \"first_name\": \"Sophea\",\n    \"last_name\": \"Chan\",\n    \"email\": \"sophea@example.com\",\n    \"phone\": \"012345678\"\n}"
         },
         "url": {
-          "raw": "{{base_url}}/v1/payments/{{payment_uuid}}/khqr",
+          "raw": "{{base_url}}/v1/payments/{{payment_uuid}}/checkout-sessions",
           "host": ["{{base_url}}"],
-          "path": ["v1", "payments", "{{payment_uuid}}", "khqr"]
+          "path": ["v1", "payments", "{{payment_uuid}}", "checkout-sessions"]
         },
-        "description": "Generate KHQR for a payment (canonical route)"
+        "description": "Create checkout session for a payment (canonical route)"
       }
     },
     {
@@ -59,11 +59,11 @@
           }
         ],
         "url": {
-          "raw": "{{base_url}}/v1/payments/{{payment_uuid}}/status",
+          "raw": "{{base_url}}/v1/payments/{{payment_uuid}}",
           "host": ["{{base_url}}"],
-          "path": ["v1", "payments", "{{payment_uuid}}", "status"]
+          "path": ["v1", "payments", "{{payment_uuid}}"]
         },
-        "description": "Check payment status (canonical route)"
+        "description": "Get payment resource/status (canonical route)"
       }
     },
     {
@@ -82,9 +82,9 @@
           "raw": "{\n    \"tran_id\": \"PAY202510-0001\",\n    \"status\": \"0\",\n    \"apv\": \"123456789\",\n    \"return_params\": \"eyJ0cmFuc2FjdGlvbl91dWlkIjoiOTlhYjNkMzQtZGNhZi00MjI4LWI2ZTgtMzQ1Njc4OWFiY2RlIiwicGF5bWVudF91dWlkIjoiNzdhYjNkMzQtZGNhZi00MjI4LWI2ZTgtMTIzNDU2N2FiY2RlIn0=\"\n}"
         },
         "url": {
-          "raw": "{{base_url}}/v1/payway/webhook",
+          "raw": "{{base_url}}/v1/webhooks/payway",
           "host": ["{{base_url}}"],
-          "path": ["v1", "payway", "webhook"]
+          "path": ["v1", "webhooks", "payway"]
         },
         "description": "Simulate PayWay webhook callback (success)"
       }
@@ -105,9 +105,9 @@
           "raw": "{\n    \"tran_id\": \"PAY202510-0001\",\n    \"status\": \"1\",\n    \"status_message\": \"Transaction failed\",\n    \"return_params\": \"eyJ0cmFuc2FjdGlvbl91dWlkIjoiOTlhYjNkMzQtZGNhZi00MjI4LWI2ZTgtMzQ1Njc4OWFiY2RlIiwicGF5bWVudF91dWlkIjoiNzdhYjNkMzQtZGNhZi00MjI4LWI2ZTgtMTIzNDU2N2FiY2RlIn0=\"\n}"
         },
         "url": {
-          "raw": "{{base_url}}/v1/payway/webhook",
+          "raw": "{{base_url}}/v1/webhooks/payway",
           "host": ["{{base_url}}"],
-          "path": ["v1", "payway", "webhook"]
+          "path": ["v1", "webhooks", "payway"]
         },
         "description": "Simulate PayWay webhook callback (failure)"
       }

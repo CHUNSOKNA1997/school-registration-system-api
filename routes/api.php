@@ -6,10 +6,15 @@ use App\Http\Controllers\API\V1\PaymentController;
 // Include v1 routes
 include __DIR__ . '/api/v1.php';
 
-// Deprecated Payway payment routes (kept for backward compatibility)
+// Canonical webhook endpoint
+// - POST /api/v1/webhooks/payway
+Route::post('/v1/webhooks/payway', [PaymentController::class, 'webhookCanonical']);
+
+// Deprecated Payway routes (kept for backward compatibility)
 // Canonical replacements:
-// - POST /api/v1/payments/{payment_uuid}/khqr
-// - GET  /api/v1/payments/{payment_uuid}/status
+// - POST /api/v1/payments/{payment_uuid}/checkout-sessions
+// - GET  /api/v1/payments/{payment_uuid}
+// - POST /api/v1/webhooks/payway
 Route::group(['prefix' => 'v1/payway'], function () {
     // Protected routes (require authentication)
     Route::middleware(['auth:sanctum'])->group(function () {
