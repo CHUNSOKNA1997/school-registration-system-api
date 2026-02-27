@@ -16,8 +16,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class StudentController extends Controller
 {
-    private const CANONICAL_STUDENT_RESOURCE_PATH = '/api/v1/students/{student}';
-    private const SUNSET_AT = '2026-06-30 23:59:59 UTC';
     private const BASE_MONTHLY_TUITION = 500.00;
     private const YEARLY_DISCOUNT_RATE = 0.10;
 
@@ -34,6 +32,7 @@ class StudentController extends Controller
     public function index(Request $request)
     {
         $query = Student::with(['class', 'creator']);
+        $selfProfile = $this->authenticatedStudentProfile($request);
 
         // Search
         if ($request->has('search')) {
@@ -60,6 +59,14 @@ class StudentController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($request->user()->isStudent()) {
+            if ($selfProfile) {
+                $query->where('id', $selfProfile->id);
+            } else {
+                $query->whereRaw('1 = 0');
+            }
+        }
+
         $students = $query->paginate($request->get('per_page', 15));
 
         return response()->jsonSuccess(StudentResource::collection($students));
@@ -70,15 +77,48 @@ class StudentController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        if ($this->isStudentSelfServiceUser($request)) {
+            return response()->jsonError('Use POST /api/v1/student-registrations for student self-registration', 403);
+        }
+
+        $validated = $this->validateStudentPayload($request);
+
+        return $this->createStudentFromPayload($request, $validated, null);
+    }
+
+    /**
+     * Student self-service registration endpoint.
+     */
+    public function selfRegister(Request $request): Response
+    {
+        if ($request->user()->is_admin) {
+            return response()->jsonError('Admin account cannot use student self-registration endpoint', 403);
+        }
+
+        if (!$request->user()->isStudent()) {
+            return response()->jsonError('Only student accounts can use self-registration endpoint', 403);
+        }
+
+        if ($request->user()->studentProfile()->exists()) {
+            return response()->jsonError('Student profile already exists for this account', 422);
+        }
+
+        $validated = $this->validateStudentPayload($request);
+
+        return $this->createStudentFromPayload($request, $validated, (int) $request->user()->id);
+    }
+
+    private function validateStudentPayload(Request $request): array
+    {
+        return $request->validate([
             'first_name' => ['required', 'string', 'max:100'],
             'last_name' => ['required', 'string', 'max:100'],
             'khmer_name' => ['nullable', 'string'],
             'date_of_birth' => [
                 'required',
                 'date',
-                'before:' . now()->subYears(4)->format('Y-m-d'), // Must be at least 4 years old
-                'after:' . now()->subYears(25)->format('Y-m-d'),  // Not older than 25
+                'before:' . now()->subYears(4)->format('Y-m-d'),
+                'after:' . now()->subYears(25)->format('Y-m-d'),
             ],
             'place_of_birth' => ['nullable', 'string'],
             'gender' => ['required', 'string', 'in:male,female,other'],
@@ -103,7 +143,10 @@ class StudentController extends Controller
             'documents' => ['nullable', 'array'],
             'notes' => ['nullable', 'string'],
         ]);
+    }
 
+    private function createStudentFromPayload(Request $request, array $validated, ?int $linkedUserId): Response
+    {
         // Validate class capacity if class is selected
         if (!empty($validated['class_id'])) {
             $class = Classroom::findOrFail($validated['class_id']);
@@ -130,6 +173,7 @@ class StudentController extends Controller
             $validated['uuid'] = Str::uuid();
             $validated['created_by'] = $request->user()->id;
             $validated['status'] = 'active';
+            $validated['user_id'] = $linkedUserId;
 
             $student = Student::create($validated);
 
@@ -144,7 +188,7 @@ class StudentController extends Controller
             DB::commit();
 
             return response()->jsonSuccess(StudentResource::make($student), 201, 'Student registered successfully');
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             return response()->jsonError($e->getMessage(), 500);
         }
@@ -153,10 +197,17 @@ class StudentController extends Controller
     /**
      * Display the specified student
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $student = $this->findStudentByIdOrUuid((string) $id)
             ->load(['class', 'subjects', 'payments', 'creator']);
+
+        $selfProfile = $this->authenticatedStudentProfile($request);
+        if ($request->user()->isStudent()) {
+            if (!$selfProfile || (int) $selfProfile->id !== (int) $student->id) {
+                return response()->jsonError('Unauthorized access to student profile', 403);
+            }
+        }
 
         return response()->jsonSuccess(StudentResource::make($student));
     }
@@ -184,13 +235,7 @@ class StudentController extends Controller
      */
     public function update(Request $request, $id): Response
     {
-        $response = $this->handleUpdate($request, $id);
-
-        if ($request->isMethod('put')) {
-            return $this->withDeprecationHeaders($response, self::CANONICAL_STUDENT_RESOURCE_PATH);
-        }
-
-        return $response;
+        return $this->handleUpdate($request, $id);
     }
 
     private function handleUpdate(Request $request, $id): Response
@@ -379,15 +424,18 @@ class StudentController extends Controller
         ];
     }
 
-    private function withDeprecationHeaders(Response $response, string $replacementPath): Response
+    private function isStudentSelfServiceUser(Request $request): bool
     {
-        $sunset = gmdate('D, d M Y H:i:s \G\M\T', strtotime(self::SUNSET_AT));
+        return (bool) $request->user()?->isStudent();
+    }
 
-        $response->headers->set('Deprecation', 'true');
-        $response->headers->set('Sunset', $sunset);
-        $response->headers->set('Link', sprintf('<%s>; rel="successor-version"', $replacementPath));
+    private function authenticatedStudentProfile(Request $request): ?Student
+    {
+        if (!$request->user() || !$request->user()->isStudent()) {
+            return null;
+        }
 
-        return $response;
+        return $request->user()->studentProfile;
     }
 
     private function hasDuplicateIdentity(array $payload, ?int $ignoreStudentId = null): bool

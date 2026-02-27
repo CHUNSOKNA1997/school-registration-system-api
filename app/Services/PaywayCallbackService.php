@@ -7,7 +7,7 @@ class PaywayCallbackService
     /**
      * Get the appropriate callback URL for PayWay pushback
      *
-     * @param string $path The URL path (e.g., '/api/v1/payway/webhook')
+     * @param string $path The URL path (e.g., '/api/v1/webhooks/payway')
      * @return string The URL encoded in base64
      */
     public static function getCallbackUrl(string $path): string

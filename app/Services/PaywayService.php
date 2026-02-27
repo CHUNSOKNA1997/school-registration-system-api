@@ -53,7 +53,7 @@ class PaywayService
             $paymentOption = config('payway.khqr.payment_option_code', 'abapay');
 
             // Callback URLs - Use PaywayCallbackService for smart URL resolution
-            $returnUrl = PaywayCallbackService::getCallbackUrl('/api/v1/payway/webhook');
+            $returnUrl = PaywayCallbackService::getCallbackUrl('/api/v1/webhooks/payway');
             $continueUrl = url('/payment/success');
             $androidScheme = url('/payment/success');
             $iosScheme = url('/payment/success');
@@ -296,7 +296,7 @@ class PaywayService
         $email = $baseFormData['email'] ?? ($customerData['email'] ?? '');
         $phone = $baseFormData['phone'] ?? ($customerData['phone'] ?? '');
         $paymentOption = $baseFormData['payment_option'] ?? config('payway.khqr.payment_option_code', 'abapay');
-        $returnUrl = PaywayCallbackService::getCallbackUrl('/api/v1/payway/webhook');
+        $returnUrl = PaywayCallbackService::getCallbackUrl('/api/v1/webhooks/payway');
         $continueUrl = url('/payment/success');
         $returnDeeplink = base64_encode(json_encode([
             'android_scheme' => $continueUrl,

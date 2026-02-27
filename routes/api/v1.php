@@ -20,19 +20,6 @@ Route::group(['prefix' => 'v1', 'as' => 'v1.'], function () {
         Route::delete('sessions/current', [AuthController::class, 'destroyCurrentSession']);
     });
 
-    // Deprecated auth routes (kept non-breaking)
-    Route::group(['prefix' => 'auth', 'as' => 'auth.'], function () {
-        // Public routes (deprecated aliases)
-        Route::post('register', [AuthController::class, 'register']);
-        Route::post('login', [AuthController::class, 'login']);
-
-        // Protected routes (deprecated aliases)
-        Route::middleware(['auth:sanctum'])->group(function () {
-            Route::delete('logout', [AuthController::class, 'logout']);
-            Route::get('user', [AuthController::class, 'user']);
-        });
-    });
-
     // Protected resource routes (Staff & Admin)
     Route::middleware(['auth:sanctum'])->group(function () {
         // Dashboard
@@ -45,20 +32,13 @@ Route::group(['prefix' => 'v1', 'as' => 'v1.'], function () {
         Route::get('users/me', [UserController::class, 'userMe']);
         Route::patch('users/me', [UserController::class, 'updateUserMe']);
 
-        // Deprecated self-profile routes
-        Route::get('profile', [UserController::class, 'profile']);
-        Route::put('profile', [UserController::class, 'updateProfile']);
-
         // Canonical payment routes (REST-style)
         Route::post('payments/{payment_uuid}/checkout-sessions', [PaymentController::class, 'createCheckoutSession']);
         Route::get('payments/{payment_uuid}', [PaymentController::class, 'showPayment']);
 
-        // Deprecated payment aliases (kept non-breaking)
-        Route::post('payments/{payment_uuid}/khqr', [PaymentController::class, 'generateKHQRForPayment']);
-        Route::get('payments/{payment_uuid}/status', [PaymentController::class, 'checkPaymentStatus']);
-
         // Payment plan options for student registration UI
         Route::get('payment-plans', [StudentController::class, 'paymentPlans']);
+        Route::post('student-registrations', [StudentController::class, 'selfRegister']);
 
         // Students - Staff can create/view, Admin can update/delete
         Route::get('students', [StudentController::class, 'index']);
@@ -70,35 +50,26 @@ Route::group(['prefix' => 'v1', 'as' => 'v1.'], function () {
             Route::get('enrollments', [StudentSubjectController::class, 'index']);
             Route::post('enrollments', [StudentSubjectController::class, 'store']);
             Route::patch('enrollments/{enrollment}', [StudentSubjectController::class, 'updatePartial']);
-            // Deprecated alias
-            Route::put('enrollments/{enrollment}', [StudentSubjectController::class, 'update']);
             Route::delete('enrollments/{enrollment}', [StudentSubjectController::class, 'destroy']);
             Route::get('transcript', [StudentSubjectController::class, 'transcript']);
         });
 
         // Canonical bulk enrollment batch endpoint
         Route::post('enrollment-batches', [StudentSubjectController::class, 'createEnrollmentBatch']);
-        // Deprecated alias
-        Route::post('enrollments/bulk', [StudentSubjectController::class, 'bulkEnroll']);
     });
 
     // Admin-only routes
     Route::middleware(['auth:sanctum', 'admin'])->group(function () {
         // Students - Update/Delete (Admin only)
         Route::patch('students/{student}', [StudentController::class, 'update']);
-        // Deprecated alias
-        Route::put('students/{student}', [StudentController::class, 'update']);
         Route::delete('students/{student}', [StudentController::class, 'destroy']);
 
         // User Management (Admin only)
         Route::get('users', [UserController::class, 'index']);
         Route::post('users', [UserController::class, 'store']);
         Route::get('users/{id}', [UserController::class, 'show']);
-        Route::put('users/{id}', [UserController::class, 'update']);
         Route::patch('users/{id}', [UserController::class, 'update']);
         Route::delete('users/{id}', [UserController::class, 'destroy']);
-        // Deprecated endpoint. Use PATCH /api/v1/users/{id} with {"is_active": true}
-        Route::post('users/{id}/activate', [UserController::class, 'activate']);
 
         Route::apiResource('teachers', TeacherController::class);
         Route::apiResource('classrooms', ClassroomController::class);

@@ -15,11 +15,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class PaymentController extends Controller
 {
-    private const CANONICAL_PAYMENT_CHECKOUT_SESSION_PATH = '/api/v1/payments/{payment_uuid}/checkout-sessions';
-    private const CANONICAL_PAYMENT_RESOURCE_PATH = '/api/v1/payments/{payment_uuid}';
-    private const CANONICAL_PAYWAY_WEBHOOK_PATH = '/api/v1/webhooks/payway';
-    private const SUNSET_AT = '2026-06-30 23:59:59 UTC';
-
     protected $paywayService;
 
     public function __construct(PaywayService $paywayService)
@@ -27,56 +22,6 @@ class PaymentController extends Controller
         $this->paywayService = $paywayService;
     }
 
-    /**
-     * Legacy endpoint: payment UUID in request body.
-     * Successor: POST /api/v1/payments/{payment_uuid}/checkout-sessions
-     */
-    public function generateKHQR(Request $request)
-    {
-        $request->validate([
-            'payment_uuid' => 'required|string',
-            'first_name' => 'nullable|string',
-            'last_name' => 'nullable|string',
-            'email' => 'nullable|email',
-            'phone' => 'nullable|string',
-        ]);
-
-        $response = $this->handleGenerateKHQR($request->payment_uuid, [
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-        ]);
-
-        return $this->withDeprecationHeaders($response, self::CANONICAL_PAYMENT_CHECKOUT_SESSION_PATH);
-    }
-
-    /**
-     * Deprecated alias endpoint.
-     * Successor: POST /api/v1/payments/{payment_uuid}/checkout-sessions
-     */
-    public function generateKHQRForPayment(Request $request, string $payment_uuid)
-    {
-        $request->validate([
-            'first_name' => 'nullable|string',
-            'last_name' => 'nullable|string',
-            'email' => 'nullable|email',
-            'phone' => 'nullable|string',
-        ]);
-
-        $response = $this->handleGenerateKHQR($payment_uuid, [
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-        ]);
-
-        return $this->withDeprecationHeaders($response, self::CANONICAL_PAYMENT_CHECKOUT_SESSION_PATH);
-    }
-
-    /**
-     * Canonical endpoint for creating a payment checkout session.
-     */
     public function createCheckoutSession(Request $request, string $payment_uuid)
     {
         $request->validate([
@@ -86,7 +31,7 @@ class PaymentController extends Controller
             'phone' => 'nullable|string',
         ]);
 
-        return $this->handleGenerateKHQR($payment_uuid, [
+        return $this->handleGenerateKHQR($request, $payment_uuid, [
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'email' => $request->email,
@@ -100,17 +45,6 @@ class PaymentController extends Controller
     public function webhookCanonical(Request $request)
     {
         return $this->handleWebhook($request);
-    }
-
-    /**
-     * Deprecated webhook alias endpoint.
-     * Successor: POST /api/v1/webhooks/payway
-     */
-    public function webhook(Request $request)
-    {
-        $response = $this->handleWebhook($request);
-
-        return $this->withDeprecationHeaders($response, self::CANONICAL_PAYWAY_WEBHOOK_PATH);
     }
 
     private function handleWebhook(Request $request): Response
@@ -329,44 +263,19 @@ class PaymentController extends Controller
         }
     }
 
-    /**
-     * Legacy endpoint: payment UUID in request body.
-     * Successor: GET /api/v1/payments/{payment_uuid}
-     */
-    public function checkStatus(Request $request)
+    public function showPayment(Request $request, string $payment_uuid)
     {
-        $request->validate([
-            'payment_uuid' => 'required|string',
-        ]);
-
-        $response = $this->handleCheckStatus($request->payment_uuid);
-
-        return $this->withDeprecationHeaders($response, self::CANONICAL_PAYMENT_RESOURCE_PATH);
+        return $this->handleCheckStatus($request, $payment_uuid);
     }
 
-    /**
-     * Deprecated alias endpoint.
-     * Successor: GET /api/v1/payments/{payment_uuid}
-     */
-    public function checkPaymentStatus(string $payment_uuid)
-    {
-        $response = $this->handleCheckStatus($payment_uuid);
-
-        return $this->withDeprecationHeaders($response, self::CANONICAL_PAYMENT_RESOURCE_PATH);
-    }
-
-    /**
-     * Canonical payment resource read endpoint.
-     */
-    public function showPayment(string $payment_uuid)
-    {
-        return $this->handleCheckStatus($payment_uuid);
-    }
-
-    private function handleGenerateKHQR(string $paymentUuid, array $customerData): Response
+    private function handleGenerateKHQR(Request $request, string $paymentUuid, array $customerData): Response
     {
         try {
             $payment = Payment::where('uuid', $paymentUuid)->firstOrFail();
+            $authorizationError = $this->authorizePaymentAccess($request, $payment);
+            if ($authorizationError) {
+                return $authorizationError;
+            }
 
             // Check if payment is already paid
             if ($payment->status === 'paid') {
@@ -395,12 +304,16 @@ class PaymentController extends Controller
         }
     }
 
-    private function handleCheckStatus(string $paymentUuid): Response
+    private function handleCheckStatus(Request $request, string $paymentUuid): Response
     {
         try {
             $payment = Payment::where('uuid', $paymentUuid)
                 ->with('paywayTransaction')
                 ->firstOrFail();
+            $authorizationError = $this->authorizePaymentAccess($request, $payment);
+            if ($authorizationError) {
+                return $authorizationError;
+            }
 
             $this->reconcilePaymentStatusFromGateway($payment);
             $payment->refresh()->load('paywayTransaction');
@@ -487,14 +400,30 @@ class PaymentController extends Controller
         }
     }
 
-    private function withDeprecationHeaders(Response $response, string $replacementPath): Response
+    private function authorizePaymentAccess(Request $request, Payment $payment): ?Response
     {
-        $sunset = gmdate('D, d M Y H:i:s \G\M\T', strtotime(self::SUNSET_AT));
+        $user = $request->user();
+        if (!$user) {
+            return response()->jsonError('Unauthenticated', 401);
+        }
 
-        $response->headers->set('Deprecation', 'true');
-        $response->headers->set('Sunset', $sunset);
-        $response->headers->set('Link', sprintf('<%s>; rel="successor-version"', $replacementPath));
+        if ($user->is_admin) {
+            return null;
+        }
 
-        return $response;
+        if (!$user->isStudent()) {
+            return null;
+        }
+
+        $studentProfile = $user->studentProfile;
+        if (!$studentProfile) {
+            return response()->jsonError('Student profile not found for this account', 403);
+        }
+
+        if ((int) $payment->student_id !== (int) $studentProfile->id) {
+            return response()->jsonError('Unauthorized access to payment', 403);
+        }
+
+        return null;
     }
 }

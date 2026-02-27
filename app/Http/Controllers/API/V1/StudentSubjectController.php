@@ -13,10 +13,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class StudentSubjectController extends Controller
 {
-    private const CANONICAL_ENROLLMENT_RESOURCE_PATH = '/api/v1/students/{student}/enrollments/{enrollment}';
-    private const CANONICAL_ENROLLMENT_BATCHES_PATH = '/api/v1/enrollment-batches';
-    private const SUNSET_AT = '2026-06-30 23:59:59 UTC';
-
     protected function findStudentByIdOrUuid(string $identifier): Student
     {
         return Student::where('uuid', $identifier)
@@ -102,19 +98,6 @@ class StudentSubjectController extends Controller
         }
     }
 
-    /**
-     * Deprecated alias endpoint (PUT). Use PATCH on same resource path.
-     */
-    public function update(Request $request, $studentId, $enrollmentId)
-    {
-        $response = $this->handleUpdateEnrollment($request, $studentId, $enrollmentId);
-
-        return $this->withDeprecationHeaders($response, self::CANONICAL_ENROLLMENT_RESOURCE_PATH);
-    }
-
-    /**
-     * Canonical endpoint for partial enrollment updates.
-     */
     public function updatePartial(Request $request, $studentId, $enrollmentId)
     {
         return $this->handleUpdateEnrollment($request, $studentId, $enrollmentId);
@@ -177,19 +160,6 @@ class StudentSubjectController extends Controller
         }
     }
 
-    /**
-     * Deprecated alias endpoint. Use POST /api/v1/enrollment-batches.
-     */
-    public function bulkEnroll(Request $request)
-    {
-        $response = $this->handleBulkEnroll($request);
-
-        return $this->withDeprecationHeaders($response, self::CANONICAL_ENROLLMENT_BATCHES_PATH);
-    }
-
-    /**
-     * Canonical endpoint for bulk enrollment batch creation.
-     */
     public function createEnrollmentBatch(Request $request)
     {
         return $this->handleBulkEnroll($request);
@@ -287,16 +257,5 @@ class StudentSubjectController extends Controller
                 ];
             }),
         ]);
-    }
-
-    private function withDeprecationHeaders(Response $response, string $replacementPath): Response
-    {
-        $sunset = gmdate('D, d M Y H:i:s \G\M\T', strtotime(self::SUNSET_AT));
-
-        $response->headers->set('Deprecation', 'true');
-        $response->headers->set('Sunset', $sunset);
-        $response->headers->set('Link', sprintf('<%s>; rel="successor-version"', $replacementPath));
-
-        return $response;
     }
 }

@@ -40,6 +40,7 @@ class Student extends Model
         'emergency_contact',
         'emergency_contact_relationship',
         'class_id',
+        'user_id',
         'shift',
         'registration_date',
         'academic_year',
@@ -83,6 +84,11 @@ class Student extends Model
     public function class()
     {
         return $this->belongsTo(Classroom::class, 'class_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function subjects()

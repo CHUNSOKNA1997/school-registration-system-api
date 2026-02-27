@@ -20,6 +20,7 @@ class User extends Authenticatable
         'password',
         'phone',
         'is_admin',
+        'account_type',
         'is_active',
         'last_login_at',
     ];
@@ -62,6 +63,11 @@ class User extends Authenticatable
         return $this->hasMany(Student::class, 'updated_by');
     }
 
+    public function studentProfile()
+    {
+        return $this->hasOne(Student::class, 'user_id');
+    }
+
     // Scopes
     public function scopeAdmins($query)
     {
@@ -86,6 +92,11 @@ class User extends Authenticatable
 
     public function isStaff(): bool
     {
-        return !$this->is_admin;
+        return !$this->is_admin && $this->account_type !== 'student';
+    }
+
+    public function isStudent(): bool
+    {
+        return $this->account_type === 'student';
     }
 }

@@ -40,6 +40,7 @@ class StudentResource extends JsonResource
             'emergency_contact' => $this->emergency_contact,
             'emergency_contact_relationship' => $this->emergency_contact_relationship,
             'class_id' => $this->class_id,
+            'user_id' => $this->user_id,
             'class' => $this->whenLoaded('class'),
             'shift' => $this->shift,
             'registration_date' => $this->formatDate($this->registration_date),
