@@ -46,6 +46,7 @@ class StudentApplicationService
                 ...$validated,
                 'uuid' => (string) Str::uuid(),
                 'student_code' => $this->generateStudentCode($validated['academic_year']),
+                'registration_date' => now()->toDateString(),
                 'status' => 'inactive',
             ]);
 

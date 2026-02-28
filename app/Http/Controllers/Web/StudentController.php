@@ -72,7 +72,6 @@ class StudentController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
             'email' => ['nullable', 'email'],
             'current_address' => ['nullable', 'string'],
-            'permanent_address' => ['nullable', 'string'],
             'parent_name' => ['nullable', 'string'],
             'parent_phone' => ['nullable', 'string', 'max:20'],
             'parent_occupation' => ['nullable', 'string'],
@@ -80,7 +79,6 @@ class StudentController extends Controller
             'emergency_contact_relationship' => ['nullable', 'string'],
             'class_id' => ['nullable', 'exists:classrooms,id'],
             'shift' => ['nullable', 'string', 'in:morning,afternoon,evening'],
-            'registration_date' => ['nullable', 'date'],
             'academic_year' => ['nullable', 'string', 'max:9'],
             'previous_school' => ['nullable', 'string'],
             'status' => ['required', 'string', 'in:active,inactive,suspended,graduated'],
@@ -92,6 +90,7 @@ class StudentController extends Controller
         try {
             $validated['uuid'] = Str::uuid();
             $validated['created_by'] = $request->user()->id;
+            $validated['registration_date'] = now()->toDateString();
 
             $student = Student::create($validated);
 
@@ -149,7 +148,6 @@ class StudentController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
             'email' => ['nullable', 'email'],
             'current_address' => ['nullable', 'string'],
-            'permanent_address' => ['nullable', 'string'],
             'parent_name' => ['nullable', 'string'],
             'parent_phone' => ['nullable', 'string', 'max:20'],
             'parent_occupation' => ['nullable', 'string'],
@@ -157,7 +155,6 @@ class StudentController extends Controller
             'emergency_contact_relationship' => ['nullable', 'string'],
             'class_id' => ['nullable', 'exists:classrooms,id'],
             'shift' => ['nullable', 'string', 'in:morning,afternoon,evening'],
-            'registration_date' => ['nullable', 'date'],
             'academic_year' => ['nullable', 'string', 'max:9'],
             'previous_school' => ['nullable', 'string'],
             'status' => ['required', 'string', 'in:active,inactive,suspended,graduated'],

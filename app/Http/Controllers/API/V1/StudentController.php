@@ -127,7 +127,6 @@ class StudentController extends Controller
             'phone' => ['nullable', 'string', 'max:20', Rule::unique('students', 'phone')->whereNull('deleted_at')],
             'email' => ['nullable', 'email', Rule::unique('students', 'email')->whereNull('deleted_at')],
             'current_address' => ['nullable', 'string'],
-            'permanent_address' => ['nullable', 'string'],
             'parent_name' => ['required', 'string'],
             'parent_phone' => ['required', 'string', 'max:20'],
             'parent_occupation' => ['nullable', 'string'],
@@ -135,7 +134,6 @@ class StudentController extends Controller
             'emergency_contact_relationship' => ['nullable', 'string'],
             'class_id' => ['nullable', 'exists:classes,id'],
             'shift' => ['required', 'string', 'in:morning,afternoon,evening,night,weekend'],
-            'registration_date' => ['required', 'date'],
             'academic_year' => ['required', 'string', 'max:9'],
             'payment_plan' => ['nullable', 'string', 'in:monthly,half_year,yearly'],
             'previous_school' => ['nullable', 'string'],
@@ -169,6 +167,7 @@ class StudentController extends Controller
             unset($validated['payment_plan']);
 
             // Generate unique student code
+            $validated['registration_date'] = now()->toDateString();
             $validated['student_code'] = $this->generateStudentCode($validated['academic_year']);
             $validated['uuid'] = Str::uuid();
             $validated['created_by'] = $request->user()->id;
@@ -265,7 +264,6 @@ class StudentController extends Controller
                 Rule::unique('students', 'email')->ignore($student->id)->whereNull('deleted_at'),
             ],
             'current_address' => ['nullable', 'string'],
-            'permanent_address' => ['nullable', 'string'],
             'parent_name' => ['sometimes', 'string'],
             'parent_phone' => ['sometimes', 'string', 'max:20'],
             'parent_occupation' => ['nullable', 'string'],
